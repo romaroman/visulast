@@ -1,0 +1,13 @@
+wrap previous version in classes
+add sqlalchemy usage
+put secrets in json
+environment / requirements file
+complete dockerfile
+implement telegram bot with stored cookies
+command line usage with numerous parameters
+write unit tests
+support multithreading
+support caching html skeletons
+apply some data analysis to scrapped data
+use osmnx / cartopy instead of basemap
+google location api or smthing like that (idk yet)

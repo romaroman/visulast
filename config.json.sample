@@ -1,0 +1,25 @@
+{
+    "database" : {
+        "default" : {
+            "engine" : "sqlite",
+            "dbname" : "visualastdb"
+        },
+        "postgresql" : {
+            "engine" : "postgresql",
+            "dbname" : "visualastdb",
+            "username" : "postgres",
+            "password" : "",
+            "hostname" : "127.0.0.1",
+            "port" : "5432"
+        }
+    },
+    "tokens" : {
+        "google.maps.api" : "",
+        "telegram.bot" : "",
+        "discogs.key" : "",
+        "discogs.secret" : "",
+        "last.fm": "",
+        "aws.service" : "",
+        "docker.hub" : ""
+    }
+}
