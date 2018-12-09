@@ -1,5 +1,7 @@
-import shapely
-import matplotlib.Basemap
+import shapefile as shp
+
+SHAPE_FILE = "assets/shapefiles/worldmaps/small/ne_10m_admin_0_countries_lakes"
+SHAPE_READING_FIELD = "countries"
 
 
 def extract_countries():

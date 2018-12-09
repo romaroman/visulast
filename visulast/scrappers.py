@@ -1,18 +1,28 @@
-# import wikipedia as wiki
-# import pylast
-import discogs_client as discogs
 import requests as req
 from collections import defaultdict
 
+import wikipedia as wiki
+import pylast
+import googlemaps
+import musicbrainzngs
+import discogs_client as discogs
+
+from loader import extract_countries
 from config import CONFIGURATION
 
 
 class Scrapper:
     def __init__(self, *args, **kwargs):
-        pass
+        self._countries = extract_countries()
+        self._gmaps = googlemaps.Client(key=CONFIGURATION.get_token_of("google.maps.api"))
 
-    @staticmethod
-    def normalizer(country):
+    def google_normalizer(self, query):
+        predictions = self._gmaps.places_autocomplete(input_text=query)
+        for p in predictions:
+            if 'locality' in p["types"] and 'political' in p["types"]:
+                return p["terms"][0]["value"]
+
+    def normalizer(self, country):
         norm_dict = {
             'U.S.': 'United States of America',
             'US': 'United States of America',
@@ -44,8 +54,8 @@ class LastFMScrapper(Scrapper):
                 continue
             if word[0].isupper():
                 try:
-                    pos_country = super.normalize_country(word)
-                    if pos_country in COUNTRIES:
+                    pos_country = self.normalizer(word)
+                    if pos_country in self._countries:
                         country_occur[pos_country] += 1
                 except KeyError:
                     pass
@@ -56,11 +66,10 @@ class LastFMScrapper(Scrapper):
 class DiscogsScrapper(Scrapper):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        secret = CONFIGURATION.get_token_of('discogs.secret')
-        key = CONFIGURATION.get_token_of('discogs.key')
         self.client = discogs.Client(
-            'Visualastation/0.0.1',
-            consumer_key=key, consumer_secret=secret
+            'visualast/0.0.1',
+            consumer_key=CONFIGURATION.get_token_of('discogs.key'),
+            consumer_secret=CONFIGURATION.get_token_of('discogs.secret')
         )
 
     def get_artist_address(self, artist_name):
@@ -69,6 +78,11 @@ class DiscogsScrapper(Scrapper):
             return results[0].artists[0]
         except:
             return None
+
+
+class MusicBrainzScrapper(Scrapper):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 if __name__ == "__main__":

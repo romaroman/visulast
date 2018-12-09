@@ -32,4 +32,4 @@ start_bot:
 	python src/bot.py
 
 build_image:
-	docker build -t visualastation .
+	docker build -t visualast .

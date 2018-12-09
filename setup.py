@@ -8,13 +8,13 @@ with open('LICENSE') as f:
     license = f.read()
 
 setup(
-    name='visualastation',
+    name='visualast',
     version='0.1.0',
     description='Another implementation of Last.fm visualization',
     long_description=readme,
     author='Roma Roman',
     author_email='me@protonmail.com',
-    url='https://github.com/romaroman/visualastation',
+    url='https://github.com/romaroman/visualast',
     license=license,
     packages=find_packages(exclude=('tests', 'docs'))
 )
