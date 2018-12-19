@@ -11,17 +11,19 @@ from loader import extract_countries
 from config import CONFIGURATION
 
 
-class Scrapper:
+class Normalizer:
     def __init__(self, *args, **kwargs):
         self._countries = extract_countries()
         self._gmaps = googlemaps.Client(key=CONFIGURATION.get_token_of("google.maps.api"))
 
+    @staticmethod
     def google_normalizer(self, query):
         predictions = self._gmaps.places_autocomplete(input_text=query)
         for p in predictions:
             if 'locality' in p["types"] and 'political' in p["types"]:
                 return p["terms"][0]["value"]
 
+    @staticmethod
     def normalizer(self, country):
         norm_dict = {
             'U.S.': 'United States of America',
@@ -41,7 +43,7 @@ class Scrapper:
         return country
 
 
-class LastFMScrapper(Scrapper):
+class LastFMScrapper:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.token = CONFIGURATION.keys['']
@@ -59,11 +61,10 @@ class LastFMScrapper(Scrapper):
                         country_occur[pos_country] += 1
                 except KeyError:
                     pass
-        return None if len(country_occur) == 0 else \
-            max(country_occur, key=lambda i: country_occur[i])
+        return None if len(country_occur) == 0 else max(country_occur, key=lambda i: country_occur[i])
 
 
-class DiscogsScrapper(Scrapper):
+class DiscogsScrapper:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.client = discogs.Client(
@@ -76,11 +77,13 @@ class DiscogsScrapper(Scrapper):
         results = self.client.search(artist_name, type='artist')
         try:
             return results[0].artists[0]
-        except:
+        except KeyError:
+            return None
+        finally:
             return None
 
 
-class MusicBrainzScrapper(Scrapper):
+class MusicBrainzScrapper:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
