@@ -18,9 +18,20 @@ class Configuration(metaclass=utils.Singleton):
             self.json_loader('config.json')
             self.db = self.config['database'][db]
             self.tokens = self.config['tokens']
+            self.fill_tokens()
         except (KeyError, TypeError) as e:
             errmsg('Something went wrong.', e)
             sys.exit(-1)
+
+    # noinspection PyAttributeOutsideInit
+    def fill_tokens(self):
+        self.google_maps_api = self.get_token_of('google.maps.api')
+        self.telegram_bot = self.get_token_of('telegram.bot')
+        self.discogs_key = self.get_token_of('discogs.key')
+        self.discogs_secret = self.get_token_of('discogs.secret')
+        self.last_fm = self.get_token_of('last.fm')
+        self.aws_service = self.get_token_of('aws.service')
+        self.docker_hub = self.get_token_of('docker.hub')
 
     def get_sql_url(self):
         try:

@@ -12,7 +12,7 @@ setup(
     version='0.1.0',
     description='Another implementation of Last.fm visualization',
     long_description=readme,
-    author='Roma Roman',
+    author='romaroman',
     author_email='me@protonmail.com',
     url='https://github.com/romaroman/visulast',
     license=license,
