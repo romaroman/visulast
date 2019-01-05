@@ -12,3 +12,6 @@ def extract_countries():
         if country not in countries:
             countries.append(country)
     return countries
+
+
+COUNTRIES = extract_countries()
