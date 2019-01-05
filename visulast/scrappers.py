@@ -117,12 +117,20 @@ class ArtistCountryScrapper:
 
     @staticmethod
     def get_from_lastfm_factbox(artist):
-        req = requests.get("https://www.last.fm/music/{}".format(artist.replace(' ', '+')))
-        soup = BeautifulSoup(req.text)
-        facts = soup.find("p", {"class": 'factbox-summary'}).string
-        if '(' in facts:
-            return facts[:facts.find('(')]
-        return facts
+        req = requests.get("https://www.last.fm/music/{}".format(artist.name.replace(' ', '+')))
+        soup = BeautifulSoup(req.text, features="lxml")
+        try:
+            facts = soup.find("p", {"class": 'factbox-summary'}).string
+            if '(' in facts:
+                facts = facts[:facts.find('(') - 1]
+            locations = facts.strip(',')
+            for l in locations:
+                nl = ArtistCountryScrapper.normalize_with_dictionary(l)
+                if nl in COUNTRIES:
+                    return nl
+            return ArtistCountryScrapper.normalize_with_gmaps(facts)
+        except [AttributeError, KeyError]:
+            pass
 
     '''
     Unimplemented
@@ -155,12 +163,14 @@ class ArtistCountryScrapper:
                             return entry['area']['name']
                         except KeyError:
                             pass
-
         return None
 
     @staticmethod
-    def get_one(artist):
-        pass
+    def get_one(lastfm_artist):
+        country = ArtistCountryScrapper.get_from_musicbrainz(lastfm_artist)
+        if country not in COUNTRIES:
+            country = ArtistCountryScrapper.get_from_lastfm_factbox(lastfm_artist)
+        return country
 
     @staticmethod
     def get_all_by_user(username):
@@ -168,7 +178,8 @@ class ArtistCountryScrapper:
 
 
 if __name__ == "__main__":
-    s = lastfm_client.get_artist("kedr livanskiy")
+    # s = lastfm_client.get_artist("drake")
+    l = lastfm_client.get_user(username='Hey_Canada').get_library().get_artists()
+    for a in l[:10]:
+        print(a.item.name, ArtistCountryScrapper.get_one(a.item))
 
-
-    print(ArtistCountryScrapper.get_from_musicbrainz(s))

@@ -104,6 +104,7 @@ venv.bak/
 
 # Development & debug files
 .idea/
+.vscode/
 config.json
 .sqlite
 cache/

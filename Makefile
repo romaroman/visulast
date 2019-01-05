@@ -33,3 +33,6 @@ start_bot:
 
 build_image:
 	docker build -t visualast .
+
+pr_py:
+	~/.conda/envs/lastfm/bin/python
