@@ -1,5 +1,5 @@
 import re
-import sys
+
 import requests
 from collections import defaultdict
 from bs4 import BeautifulSoup
@@ -12,27 +12,23 @@ import discogs_client as discogs
 
 from loader import COUNTRIES
 from config import CONFIGURATION
-from setup import APP_NAME, APP_VERSION
 
 
-class CountryExtractor:
-    def __init__(self):
-        try:
-            self.lastfm_c = pylast.LastFMNetwork(api_key=CONFIGURATION.last_fm)
-        except pylast.WSError:
-            sys.exit('Invalid API key')
+lastfm_client = pylast.LastFMNetwork(api_key=CONFIGURATION.last_fm)
+gmaps_client = gmaps.Client(key=CONFIGURATION.google_maps_api)
+discogs_client = discogs.Client(
+    '{}/{}'.format(CONFIGURATION.app_name, CONFIGURATION.app_version),
+    user_token=CONFIGURATION.discogs_key
+)
+mbz.set_useragent(app=CONFIGURATION.app_name, version=CONFIGURATION.app_version)
 
-        self.gclient = gmaps.Client(key=CONFIGURATION.google_maps_api)
-        self.discogs_c = discogs.Client(
-            '{}/{}'.format(APP_NAME, APP_VERSION),
-            consumer_key=CONFIGURATION.discogs_key,
-            consumer_secret=CONFIGURATION.discogs_secret
-        )
 
-        mbz.set_useragent(app=APP_NAME, version=APP_VERSION)
+class ArtistCountryScrapper:
+    def __init__(self, *args, **kwargs):
+        super.__init__(*args, **kwargs)
 
     @staticmethod
-    def blob_normalizer(blob):
+    def normalize_with_dictionary(blob):
         norm_dict = {
             'United States of America': ['U.S.', 'US', 'USA', 'United States'],
             'United Kingdom': ['U.K.', 'UK', 'Scotland', 'Wales', 'England', 'Northern Ireland'],
@@ -44,13 +40,20 @@ class CountryExtractor:
                     return k
         return blob
 
-    def google_normalizer(self, query):
-        predictions = self.gclient.places_autocomplete(input_text=query)
+    @staticmethod
+    def normalize_with_gmaps(query):
+        predictions = gmaps_client.places_autocomplete(input_text=query)
         for p in predictions:
             if 'locality' in p["types"] and 'political' in p["types"]:
-                return p["terms"][0]["value"]
+                if p["terms"][0]["value"] in COUNTRIES:
+                    return p["terms"][0]["value"]
+                for term in p["terms"]:
+                    norm_term = ArtistCountryScrapper.normalize_with_dictionary(term["value"])
+                    if norm_term in COUNTRIES:
+                        return norm_term
 
-    def wikipedia_getter(self, artist):
+    @staticmethod
+    def get_from_wiki(artist):
         def summary_parser(text):
             country_occur = defaultdict(int)
             for word in text.split(' '):
@@ -59,13 +62,14 @@ class CountryExtractor:
                     continue
                 if word[0].isupper():
                     try:
-                        pos_country = self.blob_normalizer(word)
+                        pos_country = ArtistCountryScrapper.normalize_with_dictionary(word)
                         if pos_country in COUNTRIES:
                             country_occur[pos_country] += 1
                     except KeyError:
                         pass
             return None if len(country_occur) == 0 else max(country_occur, key=lambda i: country_occur[i])
 
+        page = None
         try:
             page = wiki.page(artist)
             soup = BeautifulSoup(page.html(), "html.parser")
@@ -75,7 +79,6 @@ class CountryExtractor:
             ]
             soup = None
             for var in possible_variants:
-                page = None
                 t_artist = artist + ' ({})'.format(var)
                 try:
                     page = wiki.page(t_artist)
@@ -103,7 +106,7 @@ class CountryExtractor:
                 except IndexError:
                     return None
             try:
-                res_country = self.blob_normalizer(origin.text.split(',')[-1][1:])
+                res_country = ArtistCountryScrapper.normalize_with_dictionary(origin.text.split(',')[-1][1:])
             except AttributeError:
                 return summary_parser(page.summary)
             if res_country in COUNTRIES:
@@ -112,45 +115,60 @@ class CountryExtractor:
         else:
             return summary_parser(page.summary)
 
-    # def last_summary_getter(artist):
-    #     req = requests.get(LAST_FM_URL.format(artist, LAST_FM_API_KEY))
-    #     try:
-    #         data = req.json()['artist']
-    #     except KeyError:
-    #         return None
-    #
-    #     fact_country = factbox_parser(data)
-    #     if fact_country:
-    #         return fact_country
-    #     if 'bio' in data:
-    #         if 'summary' in data['bio']:
-    #             return summary_parser(data['bio']['summary'])
-    #
-    #     return None
-    #
-    # def factbox_parser(jd):  # jd variable is data in json format =)
-    #     try:
-    #         url = jd['url']
-    #     except KeyError:
-    #         return None
-    #     page = requests.get(url)
-    #     soup = BeautifulSoup(page.text, 'html.parser')
-    #     try:
-    #         facts = soup.find('p', {'class': 'factbox-summary'}).text
-    #     except AttributeError:
-    #         return None
-    #
-    #     pos_country = normalize_country(facts[:(facts.find('(') - 1)].split(',')[-1][1:])
-    #     if pos_country in COUNTRIES:
-    #         return pos_country
-    #     return None
+    @staticmethod
+    def get_from_lastfm_factbox(artist):
+        req = requests.get("https://www.last.fm/music/{}".format(artist.replace(' ', '+')))
+        soup = BeautifulSoup(req.text)
+        facts = soup.find("p", {"class": 'factbox-summary'}).string
+        if '(' in facts:
+            return facts[:facts.find('(')]
+        return facts
 
-    def get_country_list(self, lim=50):
-        user = self.lastfm_c.get_user(username=self.lastfm_c.username)
-        top = user.get_top_artists(limit=lim)
-        countries = dict()
-        return countries
+    '''
+    Unimplemented
+    '''
+    @staticmethod
+    def get_from_discogs(artist):
+        res = discogs_client.search(q=artist, type='artist')
+        return res[0]
+
+    @staticmethod
+    def get_from_musicbrainz(lastfm_artist):
+        mbid = lastfm_artist.get_mbid()
+        if mbid:
+            try:
+                mb_art = mbz.get_artist_by_id(id=mbid)
+                country = mb_art['artist']['area']['name']
+                if country not in COUNTRIES:
+                    country = ArtistCountryScrapper.normalize_with_dictionary(country)
+                if country not in COUNTRIES:
+                    country = ArtistCountryScrapper.normalize_with_gmaps(country)
+                return country
+            except KeyError:
+                pass
+        else:
+            res = mbz.search_artists(query=lastfm_artist.name)
+            if res:
+                for entry in res['artist-list']:
+                    if entry['name'] and entry['name'].lower() == lastfm_artist.name.lower():
+                        try:
+                            return entry['area']['name']
+                        except KeyError:
+                            pass
+
+        return None
+
+    @staticmethod
+    def get_one(artist):
+        pass
+
+    @staticmethod
+    def get_all_by_user(username):
+        pass
 
 
 if __name__ == "__main__":
-    pass
+    s = lastfm_client.get_artist("kedr livanskiy")
+
+
+    print(ArtistCountryScrapper.get_from_musicbrainz(s))

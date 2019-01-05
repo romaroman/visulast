@@ -15,9 +15,11 @@ def errmsg(msg, e):
 class Configuration(metaclass=utils.Singleton):
     def __init__(self, db='default'):
         try:
-            self.json_loader('config.json')
+            self.json_loader('../config.json')
             self.db = self.config['database'][db]
             self.tokens = self.config['tokens']
+            self.app_name = self.config['appName']
+            self.app_version = self.config['appVersion']
             self.fill_tokens()
         except (KeyError, TypeError) as e:
             errmsg('Something went wrong.', e)
@@ -28,7 +30,6 @@ class Configuration(metaclass=utils.Singleton):
         self.google_maps_api = self.get_token_of('google.maps.api')
         self.telegram_bot = self.get_token_of('telegram.bot')
         self.discogs_key = self.get_token_of('discogs.key')
-        self.discogs_secret = self.get_token_of('discogs.secret')
         self.last_fm = self.get_token_of('last.fm')
         self.aws_service = self.get_token_of('aws.service')
         self.docker_hub = self.get_token_of('docker.hub')
@@ -73,16 +74,14 @@ class Configuration(metaclass=utils.Singleton):
                     print("Couldn\'t decode {} file, check it\'s validity.\nError message:{}".format(file, e))
                     sys.exit(-1)
         except FileNotFoundError:
-            print('File {} not found, check if it exists in project directory')
+            print('File {} not found, check if it exists in project directory'.format(file))
             sys.exit(err.ENFILE)
 
     """
     Possible parameters: google.maps.api | telegram.bot | discogs | last.fm | aws.service | docker.hub
     """
     def get_token_of(self, service):
-        if service not in self.tokens.keys:
-            return ""
         return self.tokens[service]
 
 
-CONFIGURATION = Configuration('postgresql')
+CONFIGURATION = Configuration('default')

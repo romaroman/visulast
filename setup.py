@@ -1,17 +1,15 @@
 from setuptools import setup, find_packages
+from config import CONFIGURATION
 
-APP_NAME = 'visulast'
-APP_VERSION = '0.1'
-
-with open('README.md') as f:
+with open('../README.md') as f:
     readme = f.read()
 
-with open('LICENSE') as f:
+with open('../LICENSE') as f:
     license = f.read()
 
 setup(
-    name=APP_NAME,
-    version=APP_VERSION,
+    name=CONFIGURATION.app_name,
+    version=CONFIGURATION.app_version,
     description='Another implementation of Last.fm visualization',
     long_description=readme,
     author='romaroman',
