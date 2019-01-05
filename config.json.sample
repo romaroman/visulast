@@ -16,8 +16,6 @@
     "tokens" : {
         "google.maps.api" : "",
         "telegram.bot" : "",
-        "discogs.key" : "",
-        "discogs.secret" : "",
         "last.fm": "",
         "aws.service" : "",
         "docker.hub" : ""

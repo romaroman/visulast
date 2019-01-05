@@ -8,18 +8,13 @@ import pylast
 import wikipedia as wiki
 import googlemaps as gmaps
 import musicbrainzngs as mbz
-import discogs_client as discogs
 
-from loader import COUNTRIES
+from loaders import COUNTRIES
 from config import CONFIGURATION
 
 
 lastfm_client = pylast.LastFMNetwork(api_key=CONFIGURATION.last_fm)
 gmaps_client = gmaps.Client(key=CONFIGURATION.google_maps_api)
-discogs_client = discogs.Client(
-    '{}/{}'.format(CONFIGURATION.app_name, CONFIGURATION.app_version),
-    user_token=CONFIGURATION.discogs_key
-)
 mbz.set_useragent(app=CONFIGURATION.app_name, version=CONFIGURATION.app_version)
 
 
@@ -67,7 +62,10 @@ class ArtistCountryScrapper:
                             country_occur[pos_country] += 1
                     except KeyError:
                         pass
-            return None if len(country_occur) == 0 else max(country_occur, key=lambda i: country_occur[i])
+            return None if len(country_occur) == 0 else max(
+                country_occur,
+                key=lambda i: country_occur[i]
+            )
 
         page = None
         try:
@@ -99,14 +97,17 @@ class ArtistCountryScrapper:
             origin = info_table.find("span", {"class": "birthplace"})
             if not origin:
                 try:
-                    origin = [elem for elem in info_table(text=re.compile(r'Origin|Born|Residence'))][
-                        0].parent.findNext()
+                    origin = [elem for elem in info_table(
+                        text=re.compile(r'Origin|Born|Residence'))
+                        ][0].parent.findNext()
                 except AttributeError:
                     return None
                 except IndexError:
                     return None
             try:
-                res_country = ArtistCountryScrapper.normalize_with_dictionary(origin.text.split(',')[-1][1:])
+                res_country = ArtistCountryScrapper.normalize_with_dictionary(
+                    origin.text.split(',')[-1][1:]
+                )
             except AttributeError:
                 return summary_parser(page.summary)
             if res_country in COUNTRIES:
@@ -115,8 +116,11 @@ class ArtistCountryScrapper:
         else:
             return summary_parser(page.summary)
 
+    '''
+    param: pylast.Artist
+    '''
     @staticmethod
-    def get_from_lastfm_factbox(artist):
+    def get_from_lastfm_summary(artist):
         req = requests.get("https://www.last.fm/music/{}".format(artist.name.replace(' ', '+')))
         soup = BeautifulSoup(req.text, features="lxml")
         try:
@@ -129,16 +133,22 @@ class ArtistCountryScrapper:
                 if nl in COUNTRIES:
                     return nl
             return ArtistCountryScrapper.normalize_with_gmaps(facts)
-        except [AttributeError, KeyError]:
-            pass
-
-    '''
-    Unimplemented
-    '''
-    @staticmethod
-    def get_from_discogs(artist):
-        res = discogs_client.search(q=artist, type='artist')
-        return res[0]
+        except (AttributeError, KeyError):
+            summary = artist.get_bio_summary()
+            country_occur = defaultdict(int)
+            for word in summary.split(' '):
+                word = word.strip('(),. ').replace("\n", "")
+                if word == "":
+                    continue
+                if word[0].isupper():
+                    try:
+                        possible_country = ArtistCountryScrapper.normalize_with_dictionary(word)
+                        if possible_country in COUNTRIES:
+                            country_occur[possible_country] += 1
+                    except KeyError:
+                        pass
+            return None if len(country_occur) == 0 else max(country_occur, key=lambda i: country_occur[i])
+        
 
     @staticmethod
     def get_from_musicbrainz(lastfm_artist):
@@ -169,17 +179,23 @@ class ArtistCountryScrapper:
     def get_one(lastfm_artist):
         country = ArtistCountryScrapper.get_from_musicbrainz(lastfm_artist)
         if country not in COUNTRIES:
-            country = ArtistCountryScrapper.get_from_lastfm_factbox(lastfm_artist)
+            country = ArtistCountryScrapper.get_from_lastfm_summary(lastfm_artist)
         return country
 
     @staticmethod
+    def get_one_by_string(artist_name):
+        lastfm_artist = lastfm_client.get_artist(artist_name=artist_name)
+        return ArtistCountryScrapper.get_one(lastfm_artist)
+
+    @staticmethod
     def get_all_by_user(username):
+        # last_user = lastfm_client.
         pass
 
 
 if __name__ == "__main__":
     # s = lastfm_client.get_artist("drake")
-    l = lastfm_client.get_user(username='Hey_Canada').get_library().get_artists()
-    for a in l[:10]:
+    lib = lastfm_client.get_user(username='Florian_y').get_library().get_artists()
+    for a in lib[:20]:
         print(a.item.name, ArtistCountryScrapper.get_one(a.item))
 

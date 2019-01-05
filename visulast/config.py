@@ -29,7 +29,6 @@ class Configuration(metaclass=utils.Singleton):
     def fill_tokens(self):
         self.google_maps_api = self.get_token_of('google.maps.api')
         self.telegram_bot = self.get_token_of('telegram.bot')
-        self.discogs_key = self.get_token_of('discogs.key')
         self.last_fm = self.get_token_of('last.fm')
         self.aws_service = self.get_token_of('aws.service')
         self.docker_hub = self.get_token_of('docker.hub')
@@ -78,7 +77,7 @@ class Configuration(metaclass=utils.Singleton):
             sys.exit(err.ENFILE)
 
     """
-    Possible parameters: google.maps.api | telegram.bot | discogs | last.fm | aws.service | docker.hub
+    Possible parameters: google.maps.api | telegram.bot | last.fm | aws.service | docker.hub
     """
     def get_token_of(self, service):
         return self.tokens[service]

@@ -120,7 +120,6 @@ dependencies:
     - bleach==1.5.0
     - click==6.7
     - datashape==0.5.2
-    - discogs-client==2.2.1
     - gast==0.2.0
     - graphviz==0.8.3
     - grpcio==1.11.0
