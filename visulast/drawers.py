@@ -34,7 +34,7 @@ class Drawer:
 class ArtistDrawer(Drawer):
 
     @staticmethod
-    def draw_countries(countries, user):
+    def draw_countries(countries, user='unknown'):
         """
         :param countries: dictionary with scrobble info of user's lib
                           example : {'Russia': 200, 'Japan': 100}
@@ -73,10 +73,12 @@ class ArtistDrawer(Drawer):
 
         # plt.show()
         filename = '../out/plots/worldmaps/' + user + '_' + str(datetime.now().time())[:8] + '.png'
-        plt.savefig(filename, dpi=800)
+        plt.savefig(filename, dpi=200)
         return filename
 
 
 if __name__ == '__main__':
     logger.debug('drawing')
-    ArtistDrawer.draw_countries(ArtistCountryScrapper.get_all_by_username('niedego', 50), 'niedego')
+    ArtistDrawer.draw_countries(ArtistCountryScrapper.get_all_by_username('niedego', 1), 'niedego')
+
+
