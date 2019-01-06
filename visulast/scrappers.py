@@ -188,14 +188,25 @@ class ArtistCountryScrapper:
         return ArtistCountryScrapper.get_one(lastfm_artist)
 
     @staticmethod
-    def get_all_by_user(username):
-        # last_user = lastfm_client.
-        pass
+    def get_all_by_username(name, lim=5):
+        last_user = lastfm_client.get_user(name)
+        library = last_user.get_library()
+        countries = {}
+        for i in library.get_artists(limit=lim):
+            country = ArtistCountryScrapper.get_one(i.item)
+            scrobbles = i.playcount
+            print("{}\t\t{}\t\t{}".format(i.item.name, country, scrobbles))
+            if country:
+                if country in countries.keys():
+                    countries[country] += scrobbles
+                else:
+                    countries[country] = scrobbles
+        return countries
 
 
 if __name__ == "__main__":
     # s = lastfm_client.get_artist("drake")
-    lib = lastfm_client.get_user(username='Florian_y').get_library().get_artists()
-    for a in lib[:20]:
-        print(a.item.name, ArtistCountryScrapper.get_one(a.item))
-
+    # lib = lastfm_client.get_user(username='Florian_y').get_library().get_artists()
+    # for a in lib[:20]:
+    #     print(a.item.name, ArtistCountryScrapper.get_one(a.item))
+    print(ArtistCountryScrapper.get_all_by_username('niedego'))

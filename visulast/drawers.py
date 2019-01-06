@@ -15,7 +15,12 @@ from mpl_toolkits.basemap import Basemap
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.colors import Normalize, rgb2hex
 
+from logger import get_logger
 from loaders import SHAPE_FILE, SHAPE_READING_FIELD
+from scrappers import ArtistCountryScrapper
+
+
+logger = get_logger(os.path.basename(__file__))
 
 
 class Drawer:
@@ -67,10 +72,5 @@ class ArtistDrawer(Drawer):
 
 
 if __name__ == '__main__':
-    countries = {
-        'Russia' : 100,
-        'Germany': 40,
-        'China': 20,
-        'Japan': 5
-    }
-    ArtistDrawer.draw_countries(countries, 'niedego')
+    logger.debug('drawing')
+    ArtistDrawer.draw_countries(ArtistCountryScrapper.get_all_by_username('niedego', 50), 'niedego')
