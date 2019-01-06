@@ -35,6 +35,12 @@ class ArtistDrawer(Drawer):
 
     @staticmethod
     def draw_countries(countries, user):
+        """
+        :param countries: dictionary with scrobble info of user's lib
+                          example : {'Russia': 200, 'Japan': 100}
+        :param user: last.fm user's nickname as string
+        :return path of saved .png plot
+        """
         m = Basemap(projection='mill', llcrnrlat=-60, urcrnrlat=90,
                     llcrnrlon=-180, urcrnrlon=180, resolution='c')
         fig, ax = plt.subplots()
