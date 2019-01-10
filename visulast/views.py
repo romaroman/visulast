@@ -17,21 +17,24 @@ from matplotlib.colors import Normalize, rgb2hex
 
 from logger import get_logger
 from loaders import SHAPE_FILE, SHAPE_READING_FIELD
-from scrappers import ArtistCountryScrapper
+from scrappers import CountryOfArtist
 
 
 logger = get_logger(os.path.basename(__file__))
 
 
-class Drawer:
+class _View:
     def __init__(self, *args, **kwargs):
         super.__init__(*args, **kwargs)
 
     def draw_histogram(self):
         pass
 
+    def draw_piechart(self):
+        pass
 
-class ArtistDrawer(Drawer):
+
+class ArtistView(_View):
 
     @staticmethod
     def draw_countries(countries, user='unknown'):
@@ -77,8 +80,11 @@ class ArtistDrawer(Drawer):
         return filename
 
 
+class UserView(_View):
+    pass
+
 if __name__ == '__main__':
     logger.debug('drawing')
-    ArtistDrawer.draw_countries(ArtistCountryScrapper.get_all_by_username('niedego', 1), 'niedego')
+    ArtistView.draw_countries(CountryOfArtist.get_all_by_username('niedego', 1), 'niedego')
 
 

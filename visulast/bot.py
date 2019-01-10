@@ -1,11 +1,9 @@
 import os
 
 from telegram.ext import Updater, CommandHandler
-
 from config import CONFIGURATION
 from logger import get_logger
-from drawers import ArtistDrawer
-from scrappers import ArtistCountryScrapper
+import controllers
 
 
 logger = get_logger(os.path.basename(__file__))
@@ -16,13 +14,20 @@ dispatcher = updater.dispatcher
 
 def countries(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text="Wait until bot will finish your request")
-    countries = ArtistCountryScrapper.get_all_by_username('niedego', 1)
-    file = ArtistDrawer.draw_countries(countries)
     bot.send_photo(chat_id=update.message.chat_id, caption='shiiit', photo=open(file, 'rb'))
     bot.send_message(chat_id=update.message.chat_id, text="Sending photo!")
 
 
-start_handler = CommandHandler('countries', countries)
-dispatcher.add_handler(start_handler)
+def default_username(bot, update, args):
+    username = " ".join(args)
+    update.message.reply_text("You've set default last.fm username to " + username)
+    bot.send_message(chat_id=update.message.chat_id, text=update.message.chat_id)
+
+
+countries_handler = CommandHandler('countries', countries)
+dispatcher.add_handler(countries_handler)
+
+default_username_handler = CommandHandler('default_username', default_username, pass_args=True)
+dispatcher.add_handler(default_username_handler)
 
 updater.start_polling()

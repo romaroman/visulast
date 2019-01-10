@@ -1,4 +1,4 @@
-# Singleton template for using in Configuration, Logger and others classes
+# Singleton template for using in Configuration and others classes
 class Singleton(type):
     _instances = {}
 
