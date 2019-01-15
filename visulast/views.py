@@ -17,7 +17,7 @@ from matplotlib.colors import Normalize, rgb2hex
 
 from logger import get_logger
 from loaders import SHAPE_FILE, SHAPE_READING_FIELD
-from scrappers import CountryOfArtist
+from scrappers import CountryOfArtistScrapper
 
 
 logger = get_logger(os.path.basename(__file__))
@@ -85,6 +85,6 @@ class UserView(_View):
 
 if __name__ == '__main__':
     logger.debug('drawing')
-    ArtistView.draw_countries(CountryOfArtist.get_all_by_username('niedego', 1), 'niedego')
+    ArtistView.draw_countries(CountryOfArtistScrapper.get_all_by_username('niedego', 1), 'niedego')
 
 

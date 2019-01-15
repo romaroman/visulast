@@ -1,14 +1,14 @@
 import unittest
 
-from visulast.scrappers import CountryOfArtist
+from visulast.scrappers import CountryOfArtistScrapper
 
 
 class TestArtistScrappers(unittest.TestCase):
 
     def test_single_artist(self):
-        self.assertEqual('Poland', CountryOfArtist.get_one_by_string('Drake'))
-        self.assertEqual('United States of America', CountryOfArtist.get_one_by_string('Bowery Electric'))
-        self.assertEqual('United Kingdom', CountryOfArtist.get_one_by_string('Joy Division'))
+        self.assertEqual('Poland', CountryOfArtistScrapper.get_one_by_string('Drake'))
+        self.assertEqual('United States of America', CountryOfArtistScrapper.get_one_by_string('Bowery Electric'))
+        self.assertEqual('United Kingdom', CountryOfArtistScrapper.get_one_by_string('Joy Division'))
 
 
 if __name__ == '__main__':
