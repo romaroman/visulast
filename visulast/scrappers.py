@@ -150,7 +150,6 @@ class CountryOfArtistScrapper:
                     except KeyError:
                         pass
             return None if len(country_occur) == 0 else max(country_occur, key=lambda i: country_occur[i])
-        
 
     @staticmethod
     def get_from_musicbrainz(lastfm_artist):
@@ -189,22 +188,6 @@ class CountryOfArtistScrapper:
         lastfm_artist = lastfm_client.get_artist(artist_name=artist_name)
         return CountryOfArtistScrapper.get_one(lastfm_artist)
 
-    @staticmethod
-    def get_all_by_username(name, lim=5):
-        last_user = lastfm_client.get_user(name)
-        library = last_user.get_library()
-        countries = {}
-        for i in library.get_artists(limit=lim):
-            country = CountryOfArtistScrapper.get_one(i.item)
-            scrobbles = i.playcount
-            print("{}\t\t{}\t\t{}".format(i.item.name, country, scrobbles))
-            if country:
-                if country in countries.keys():
-                    countries[country] += scrobbles
-                else:
-                    countries[country] = scrobbles
-        return countries
-
 
 if __name__ == "__main__":
-    print(CountryOfArtistScrapper.get_all_by_username('niedego'))
+    print(CountryOfArtistScrapper.get_all_scrobbles_by_username('niedego'))

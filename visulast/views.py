@@ -24,8 +24,12 @@ logger = get_logger(os.path.basename(__file__))
 
 
 class _View:
-    def __init__(self, *args, **kwargs):
-        super.__init__(*args, **kwargs)
+    def __init__(self, name, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.name = name
+
+    def draw_world_map(self, data):
+        pass
 
     def draw_histogram(self):
         pass
@@ -34,14 +38,15 @@ class _View:
         pass
 
 
-class ArtistView(_View):
+class UserView(_View):
 
-    @staticmethod
-    def draw_countries(countries, user='unknown'):
+    def __init__(self, name):
+        super(UserView, self).__init__(name)
+
+    def draw_world_map(self, data):
         """
-        :param countries: dictionary with scrobble info of user's lib
+        :param data: dictionary with scrobble info of user's lib
                           example : {'Russia': 200, 'Japan': 100}
-        :param user: last.fm user's nickname as string
         :return path of saved .png plot
         """
         m = Basemap(projection='mill', llcrnrlat=-60, urcrnrlat=90,
@@ -49,7 +54,7 @@ class ArtistView(_View):
         fig, ax = plt.subplots()
         m.readshapefile(SHAPE_FILE, SHAPE_READING_FIELD)
 
-        vmin, vmax = 0, max(countries.values(), key=lambda i: i)
+        vmin, vmax = 0, max(data.values(), key=lambda i: i)
         norm = Normalize(vmin=vmin, vmax=vmax)
         colors = {}
         cmap = plt.cm.cool_r
@@ -57,34 +62,32 @@ class ArtistView(_View):
 
         for shapedict in m.countries_info:
             statename = shapedict['SOVEREIGNT']
-            if statename not in coloured_countries and statename in countries.keys():
-                comp = countries[statename]
+            if statename not in coloured_countries and statename in data.keys():
+                comp = data[statename]
                 colors[statename] = cmap(np.sqrt((comp - vmin) / (vmax - vmin)))[:3]
                 coloured_countries.append(statename)
 
         for seg, info in zip(m.countries, m.countries_info):
-            if info['SOVEREIGNT'] in countries.keys():
+            if info['SOVEREIGNT'] in data.keys():
                 color = rgb2hex(colors[info['SOVEREIGNT']])
                 poly = Polygon(seg, facecolor=color)
                 ax.add_patch(poly)
 
-        plt.title('Map of {}\'s most listened countries'.format(user))
+        plt.title('Map of {}\'s most listened countries'.format(self.name))
 
         ax_c = fig.add_axes([0.2, 0.1, 0.6, 0.03])
         cb = ColorbarBase(ax_c, cmap=cmap, norm=norm, orientation='horizontal',
                           label=r'[number of scrobbles per country]')
 
-        # plt.show()
-        filename = '../out/plots/worldmaps/' + user + '_' + str(datetime.now().time())[:8] + '.png'
+        filename = '../out/plots/worldmaps/' + self.name + '_' + str(datetime.now().time())[:8] + '.png'
         plt.savefig(filename, dpi=200)
         return filename
 
 
-class UserView(_View):
+class UserView1(_View):
     pass
+
 
 if __name__ == '__main__':
     logger.debug('drawing')
-    ArtistView.draw_countries(CountryOfArtistScrapper.get_all_by_username('niedego', 1), 'niedego')
-
-
+    # UserView.draw_countries(CountryOfArtistScrapper.get_all_scrobbles_by_username('niedego', 1), 'niedego')
