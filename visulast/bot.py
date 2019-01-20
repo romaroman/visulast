@@ -12,12 +12,15 @@ updater = Updater(token=CONFIGURATION.telegram_bot)
 dispatcher = updater.dispatcher
 
 
-def countries(bot, update, args):
-    lastfm_username = " ".join(args)
-    controller = controllers.UserController(lastfm_username, update.message.chat_id)
+def artists(bot, update, args):
+    controller = controllers.UserController(args[0], update.message.chat_id)
+    if args[1] == 'scrobbles':
+        file = controller.scrobbles_world_map(args[2])
+    if args[1] == 'amount':
+        file = controller.artist_amount_world_map(int(args[2]))
     bot.send_photo(chat_id=update.message.chat_id, caption='Your map bro)',
-                   photo=open(controller.scrobbles_world_map(2), 'rb'))
-    bot.send_message(chat_id=update.message.chat_id, text="Sending photo!")
+                   photo=open(file, 'rb'))
+    # bot.send_message(chat_id=update.message.chat_id, text="Sending photo!")
 
 
 def default_username(bot, update, args):
@@ -26,8 +29,8 @@ def default_username(bot, update, args):
     bot.send_message(chat_id=update.message.chat_id, text=update.message.chat_id)
 
 
-countries_handler = CommandHandler('countries', countries, pass_args=True)
-dispatcher.add_handler(countries_handler)
+artists_handler = CommandHandler('artists', artists, pass_args=True)
+dispatcher.add_handler(artists_handler)
 
 default_username_handler = CommandHandler('default_username', default_username, pass_args=True)
 dispatcher.add_handler(default_username_handler)
