@@ -1,4 +1,8 @@
 import scrappers
+from logger import get_logger
+import os
+
+logger = get_logger(os.path.basename(__file__))
 
 
 class _Model:
@@ -14,31 +18,28 @@ class UserModel(_Model):
         super(UserModel, self).__init__()
         self.username = name
         self.telegram_id = chat_id
+        self.lastfm_user = scrappers.lastfm_client.get_user(self.username)
+        self.library = self.lastfm_user.get_library()
 
-    def get_scrobbles_for_all_countries(self, limit=5):
+    def get_for_all_countries(self, what='s', limit=5):
         """
-        :param limit: amount of top artists
-        :return: dictionary {'Country blob': #scrobbles, ...}
-
-        CountryOfArtistScrapper.get_all_scrobbles_by_username(name='rocker', lim=25)
+        :param what: type of gathering data: s for scrobbles, else - artists amount (char/string, default 's')
+        :param limit: amount of top artists                     (integer, default 5)
+        :return: countries: {'Russia': 120, 'Germany': 44, ...} (dictionary)
         """
-        last_user = scrappers.lastfm_client.get_user(self.username)
-        library = last_user.get_library()
         countries = {}
-        for i in library.get_artists(limit=limit):
+        for i in self.library.get_artists(limit=limit):
             country = scrappers.CountryOfArtistScrapper.get_one(i.item)
-            scrobbles = i.playcount
-            print("{}\t\t{}\t\t{}".format(i.item.name, country, scrobbles))
+            logger.info("{}\t{}\t".format(i.item.name, country))
+            v = 1
+            if what == 's':
+                v = i.playcount
             if country:
                 if country in countries.keys():
-                    countries[country] += scrobbles
+                    countries[country] += v
                 else:
-                    countries[country] = scrobbles
+                    countries[country] = v
         return countries
-
-    def get_artists_amount_per_country(self):
-
-        pass
 
     def get_scrobbles_per_country(self):
         return
