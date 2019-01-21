@@ -1,6 +1,8 @@
 import scrappers
 from logger import get_logger
 import os
+import pandas as pd
+
 
 logger = get_logger(os.path.basename(__file__))
 

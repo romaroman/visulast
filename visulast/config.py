@@ -1,7 +1,6 @@
 import json
 import sys
 import errno as err
-
 import utils
 
 DB_ENGINES = ['postgresql', 'sqlite']

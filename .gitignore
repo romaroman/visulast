@@ -110,3 +110,4 @@ TODO
 cache/
 logs/
 out/
+*.csv
