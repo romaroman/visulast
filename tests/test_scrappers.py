@@ -10,6 +10,10 @@ class TestArtistScrappers(unittest.TestCase):
         self.assertEqual('United States of America', CountryOfArtistScrapper.get_one_by_string('Bowery Electric'))
         self.assertEqual('United Kingdom', CountryOfArtistScrapper.get_one_by_string('Joy Division'))
 
+    def test_user(self):
+        #self.assertEq
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()

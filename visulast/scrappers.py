@@ -187,7 +187,3 @@ class CountryOfArtistScrapper:
     def get_one_by_string(artist_name):
         lastfm_artist = lastfm_client.get_artist(artist_name=artist_name)
         return CountryOfArtistScrapper.get_one(lastfm_artist)
-
-
-if __name__ == "__main__":
-    print(CountryOfArtistScrapper.get_all_scrobbles_by_username('niedego'))

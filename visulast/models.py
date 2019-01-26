@@ -50,8 +50,6 @@ class UserModel(_Model):
 
 
 class AristModel(_Model):
-    def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
 
     def smthin(self):
         pass
