@@ -15,12 +15,11 @@ from mpl_toolkits.basemap import Basemap
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.colors import Normalize, rgb2hex
 
-from logger import get_logger
+import logger
 from loaders import SHAPE_FILE, SHAPE_READING_FIELD
-from scrappers import CountryOfArtistScrapper
 
 
-logger = get_logger(os.path.basename(__file__))
+logger = logger.get_logger(os.path.basename(__name__))
 
 
 class _View:

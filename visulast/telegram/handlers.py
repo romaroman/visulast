@@ -1,21 +1,38 @@
-import os
-import telegram
-
-from telegram.ext import Updater, ConversationHandler, CommandHandler, RegexHandler
-from config import CONFIGURATION
-from logger import get_logger
-import controllers
 from functools import wraps
+import telegram
+from telegram.ext import ConversationHandler
+
+import logger
+from core import controllers
 
 
-logger = get_logger(os.path.basename(__file__))
+logger = logger.get_logger(__name__)
+PERIOD_CHOOSING, TYPE_CHOOSING = range(2)
 
-PERIOD = 1
+
+keyboards = {
+    'period': [['Today', 'Week', 'Month'],
+               ['Quartal', 'Half of Year', 'Year'],
+               ['Overall', 'Custom']],
+    'actions': [['Artists', 'Albums'],
+                ['Followers', 'Followings']],
+    'graphs': [['Histogram', 'World', 'Flow'],
+               ['Pie', 'Bar', 'Line']]
+}
 
 
-# noinspection PyUnusedLocal
 def start(bot, update):
     update.message.reply_text('Hi! I am your personal last.fm plotter')
+
+
+def done(bot, update, user_data):
+    if 'choice' in user_data:
+        del user_data['choice']
+
+    update.message.reply_text("Bye, bro!")
+
+    user_data.clear()
+    return ConversationHandler.END
 
 
 def send_action(action):
@@ -32,15 +49,11 @@ def send_action(action):
 
 @send_action(telegram.ChatAction.UPLOAD_PHOTO)
 def artists(bot, update, args):
-    # bot.send_message(chat_id=update.message.chat_id, text='Wait, I\'m processing your request')
     controller = controllers.UserController(args[0], update.message.chat_id)
-    if args[1] == 'scrobbles':
-        file = controller.scrobbles_world_map(args[2])
-    if args[1] == 'amount':
-        file = controller.artist_amount_world_map(int(args[2]))
+    file = controller.scrobbles_world_map(1)
     bot.send_photo(chat_id=update.message.chat_id, caption='Your map bro)',
                    photo=open(file, 'rb'))
-    return PERIOD
+    return PERIOD_CHOOSING
     # bot.send_message(chat_id=update.message.chat_id, text="Sending photo!")
 
 
@@ -58,25 +71,6 @@ def period(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text="Choose interval", reply_markup=reply_markup)
 
 
-def main():
-    updater = Updater(token=CONFIGURATION.telegram_bot)
-    dispatcher = updater.dispatcher
+def error(bot, update, error):
+    logger.warning('Update "%s" caused error "%s"', update, error)
 
-    handlers = [
-        ConversationHandler(
-            entry_points=[CommandHandler('start', start)],
-            states={
-                PERIOD: [RegexHandler('^(Day|Week|Month|Quarter|Half a year|Year|Overall|Custom$', period)]
-            }
-        ),
-        CommandHandler('artists', artists, pass_args=True),
-        CommandHandler('default_username', default_username, pass_args=True),
-    ]
-    for handler in handlers:
-        dispatcher.add_handler(handler)
-
-    updater.start_polling()
-
-
-if __name__ == '__main__':
-    main()

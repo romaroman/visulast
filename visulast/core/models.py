@@ -1,10 +1,8 @@
-import scrappers
-from logger import get_logger
-import os
-import pandas as pd
+from core import scrappers
+import logger
 
 
-logger = get_logger(os.path.basename(__file__))
+logger = logger.get_logger(__name__)
 
 
 class _Model:

@@ -1,5 +1,4 @@
-import views
-import models
+from mvc import views, models
 
 
 class _Controller:
