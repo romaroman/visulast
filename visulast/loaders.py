@@ -1,7 +1,11 @@
 import shapefile as shp
 
+from config import PROJ_PATH
+import logger
 
-SHAPE_FILE = "../assets/shapefiles/worldmaps/small/ne_10m_admin_0_countries_lakes"
+logger = logger.get_logger(__name__)
+
+SHAPE_FILE = PROJ_PATH + "assets/shapefiles/worldmaps/small/ne_10m_admin_0_countries_lakes"
 SHAPE_READING_FIELD = "countries"
 
 

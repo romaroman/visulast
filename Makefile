@@ -23,10 +23,10 @@ export_requirements:
 	conda list --export > requirements.txt
 
 create_environment:
-	conda env create -f environment.yml
+	conda env create -f environment.yaml
 
 export_environment:
-	conda env export > environment.yml
+	conda env export > environment.yaml
 
 start_bot:
 	python src/bot.py

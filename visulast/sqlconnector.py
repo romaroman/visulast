@@ -34,7 +34,7 @@ class Result(Base):
 
 if __name__ == "__main__":
     engine = create_engine(
-        Configuration('postgresql').get_sql_url())
+        Configuration('postgresql').database.get_sql_url())
     if not database_exists(engine.url):
         create_database(engine.url)
     Base.metadata.create_all(engine)

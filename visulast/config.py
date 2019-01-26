@@ -2,66 +2,78 @@ import json
 import sys
 import errno as err
 import utils
+import os
+
+from logger import get_logger
+
+path = os.path.dirname(os.path.abspath(__file__))
+PROJ_PATH = path[:9 + path.find('visulast')]
+
+logger = get_logger(__name__)
 
 DB_ENGINES = ['postgresql', 'sqlite']
 
 
-def errmsg(msg, e):
-    print(msg + '.\nChange configuration at config.json\n' % e)
-    sys.exit(err.ENODATA)
+def errmsg(msg, e=None, code=-1):
+    logger.error('Configuration error\n{}\n\n{}' % msg % e)
+    # print(msg + '.\nChange configuration at config.json\n' % e)
+    sys.exit(code)
 
 
 class Configuration(metaclass=utils.Singleton):
-    def __init__(self, db='default'):
+    class Tokens:
+        def __init__(self, tokens):
+            self.google_maps_api = tokens['google.maps.api']
+            self.telegram_bot = tokens['telegram.bot']
+            self.last_fm = tokens['last.fm']
+            self.aws_service = tokens['aws.service']
+            self.docker_hub = tokens['docker.hub']
+
+    class Database:
+        def __init__(self, dbconfig):
+            try:
+                self.engine = dbconfig['engine']
+                self.dbname = dbconfig['dbname']
+                self.username = dbconfig['username']
+                self.password = dbconfig['password']
+                self.hostname = dbconfig['hostname']
+                self.port = dbconfig['port']
+            except KeyError as e:
+                pass
+                #errmsg('Uncorrect credits, check database configuration', e)
+
+        def get_sql_url(self):
+
+            if self.engine not in DB_ENGINES:
+                errmsg('Incorrect database engine', SystemError)
+
+            elif self.engine == 'postgresql':
+                try:
+                    if self.password:
+                        self.password = ":" + self.password
+                    if self.port:
+                        self.port = ":" + self.port
+                    return 'postgresql://{}{}@{}{}/{}'. \
+                        format(self.username, self.password, self.hostname, self.port, self.dbname)
+                except KeyError as e:
+                    errmsg('Uncorrect credits, at {} engine'.format(self.engine), e)
+
+            elif self.engine == 'sqlite':
+                try:
+                    return 'sqlite:///{}.sqlite'.format(self.dbname)
+                except KeyError as e:
+                    errmsg('Uncorrect credits, at {} engine'.format(self.engine), e)
+
+    def __init__(self, engine='default'):
         try:
-            self.json_loader('../config.json')
-            self.db = self.config['database'][db]
-            self.tokens = self.config['tokens']
+            self.json_loader(PROJ_PATH + 'config.json')
+            self.tokens = Configuration.Tokens(self.config['tokens'])
+            self.database = Configuration.Database(self.config['database'][engine])
+
             self.app_name = self.config['appName']
             self.app_version = self.config['appVersion']
-            self.fill_tokens()
         except (KeyError, TypeError) as e:
-            errmsg('Something went wrong.', e)
-            sys.exit(-1)
-
-    # noinspection PyAttributeOutsideInit
-    def fill_tokens(self):
-        self.google_maps_api = self.get_token_of('google.maps.api')
-        self.telegram_bot = self.get_token_of('telegram.bot')
-        self.last_fm = self.get_token_of('last.fm')
-        self.aws_service = self.get_token_of('aws.service')
-        self.docker_hub = self.get_token_of('docker.hub')
-
-    def get_sql_url(self):
-        try:
-            engine = self.db['engine']
-        except KeyError as e:
-            errmsg('Couldn\'t extract database engine. Aborting.', e)
-            return
-
-        if engine not in DB_ENGINES:
-            errmsg('Incorrect database engine', SystemError)
-        elif engine == 'postgresql':
-            try:
-                dbname = self.db['dbname']
-                username = self.db['username']
-                password = self.db['password']
-                hostname = self.db['hostname']
-                port = self.db['port']
-                if password != "":
-                    password = ":" + password
-                if port != "":
-                    port = ":" + port
-                return 'postgresql://{}{}@{}{}/{}'.\
-                    format(username, password, hostname, port, dbname)
-            except KeyError as e:
-                errmsg('Uncorrect credits, at {} engine'.format(engine), e)
-        elif engine == 'sqlite':
-            try:
-                dbname = self.db['dbname']
-                return 'sqlite:///{}.sqlite'.format(dbname)
-            except KeyError as e:
-                errmsg('Uncorrect credits, at {} engine'.format(engine), e)
+            errmsg('Something went wrong', e)
 
     def json_loader(self, file):
         try:
@@ -69,17 +81,9 @@ class Configuration(metaclass=utils.Singleton):
                 try:
                     self.config = json.load(jfile)
                 except (TypeError, json.JSONDecodeError) as e:
-                    print("Couldn\'t decode {} file, check it\'s validity.\nError message:{}".format(file, e))
-                    sys.exit(-1)
-        except FileNotFoundError:
-            print('File {} not found, check if it exists in project directory'.format(file))
-            sys.exit(err.ENFILE)
-
-    """
-    Possible parameters: google.maps.api | telegram.bot | last.fm | aws.service | docker.hub
-    """
-    def get_token_of(self, service):
-        return self.tokens[service]
+                    errmsg("Couldn\'t decode {} file, check it\'s validity".format(file), e)
+        except FileNotFoundError as e:
+            errmsg('File {} not found, check if it exists in {}'.format(file, PROJ_PATH), e, err.ENFILE)
 
 
 CONFIGURATION = Configuration('default')

@@ -1,9 +1,7 @@
-import os
 import re
-
 import requests
-from collections import defaultdict
 from bs4 import BeautifulSoup
+from collections import defaultdict
 
 import pylast
 import wikipedia as wiki
@@ -14,9 +12,9 @@ from logger import get_logger
 from loaders import COUNTRIES
 from config import CONFIGURATION
 
-logger = get_logger(os.path.basename(__file__))
-lastfm_client = pylast.LastFMNetwork(api_key=CONFIGURATION.last_fm)
-gmaps_client = gmaps.Client(key=CONFIGURATION.google_maps_api)
+logger = get_logger(__name__)
+lastfm_client = pylast.LastFMNetwork(api_key=CONFIGURATION.tokens.last_fm)
+gmaps_client = gmaps.Client(key=CONFIGURATION.tokens.google_maps_api)
 mbz.set_useragent(app=CONFIGURATION.app_name, version=CONFIGURATION.app_version)
 
 
@@ -187,3 +185,7 @@ class CountryOfArtistScrapper:
     def get_one_by_string(artist_name):
         lastfm_artist = lastfm_client.get_artist(artist_name=artist_name)
         return CountryOfArtistScrapper.get_one(lastfm_artist)
+
+
+if __name__ == '__main__':
+    print(CountryOfArtistScrapper.get_one_by_string('Bowery Electric'))

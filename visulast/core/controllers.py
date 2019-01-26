@@ -1,4 +1,4 @@
-from mvc import views, models
+from core import views, models
 
 
 class _Controller:

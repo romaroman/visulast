@@ -1,9 +1,10 @@
 from telegram.ext import Updater, ConversationHandler, CommandHandler, RegexHandler
 
+import logger
 from config import CONFIGURATION
-from telegram.handlers import *
+from tg.handlers import error, artists, default_username, done, start, period
 
-logger = logger
+logger = logger.get_logger(__name__)
 PERIOD_CHOOSING, TYPE_CHOOSING = range(2)
 
 
@@ -15,7 +16,7 @@ def main():
         ConversationHandler(
             entry_points=[CommandHandler('start', start)],
             states={
-                PERIOD_CHOOSING: [RegexHandler('^(Day|Week|Month|Quarter|Half a year|Year|Overall|Custom$', period)]
+                PERIOD_CHOOSING: [RegexHandler('^(Day|Week|Month|Quarter|Half a year|Year|Overall|Custom)$', period)]
             },
             fallbacks=[RegexHandler('^Done$', done, pass_user_data=True)]
         ),

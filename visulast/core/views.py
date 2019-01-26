@@ -16,10 +16,11 @@ from matplotlib.colorbar import ColorbarBase
 from matplotlib.colors import Normalize, rgb2hex
 
 import logger
+from config import PROJ_PATH
 from loaders import SHAPE_FILE, SHAPE_READING_FIELD
 
 
-logger = logger.get_logger(os.path.basename(__name__))
+logger = logger.get_logger(__name__)
 
 
 class _View:
@@ -39,7 +40,7 @@ class _View:
 
 class UserView(_View):
 
-    def __init__(self, name):
+    def __init__(self, name='noname'):
         super(UserView, self).__init__(name)
 
     def draw_world_map(self, data):
@@ -56,7 +57,7 @@ class UserView(_View):
         vmin, vmax = 0, max(data.values(), key=lambda i: i)
         norm = Normalize(vmin=vmin, vmax=vmax)
         colors = {}
-        cmap = plt.cm.cool_r
+        cmap = plt.cm.Accent
         coloured_countries = list()
 
         for shapedict in m.countries_info:
@@ -78,15 +79,16 @@ class UserView(_View):
         cb = ColorbarBase(ax_c, cmap=cmap, norm=norm, orientation='horizontal',
                           label=r'[number of scrobbles per country]')
 
-        filename = '../out/plots/worldmaps/' + self.name + '_' + str(datetime.now().time())[:8] + '.png'
+        filename = '{}out/graphs/worldmaps/{}_{}.png'.format(
+            PROJ_PATH, self.name, str(datetime.now().time())[:8]
+        )
+
         plt.savefig(filename, dpi=200)
         return filename
 
 
-class UserView1(_View):
-    pass
-
-
 if __name__ == '__main__':
     logger.debug('drawing')
+    a = UserView()
+    a.draw_world_map({'Russia': 20})
     # UserView.draw_countries(CountryOfArtistScrapper.get_all_scrobbles_by_username('niedego', 1), 'niedego')
