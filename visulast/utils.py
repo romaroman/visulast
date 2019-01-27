@@ -1,7 +1,9 @@
 # Singleton template for using in Configuration and others classes
 import sys
+from logger import get_logger
 
-from config import logger
+
+logger = get_logger(__name__)
 
 
 class Singleton(type):
