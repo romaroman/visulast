@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
-from config import CONFIGURATION
+from config import CONFIGURATION, PROJ_PATH
 
-with open(CONFIGURATION.root + 'README.md') as f:
+with open(PROJ_PATH + 'README.md') as f:
     readme = f.read()
 
-with open(CONFIGURATION.root + 'LICENSE') as f:
+with open(PROJ_PATH + 'LICENSE') as f:
     license = f.read()
 
 setup(

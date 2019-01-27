@@ -2,30 +2,45 @@ from telegram.ext import Updater, ConversationHandler, CommandHandler, RegexHand
 
 import logger
 from config import CONFIGURATION
-from tg.handlers import error, artists, default_username, done, start, period
-
+import tg.handlers as handlers
+from utils import keyboard_to_regex
 logger = logger.get_logger(__name__)
-PERIOD_CHOOSING, TYPE_CHOOSING = range(2)
+SUBJECT_CHOOSING, GRAPH_CHOOSING, PERIOD_CHOOSING = range(3)
 
 
 def main():
-    updater = Updater(token=CONFIGURATION.telegram_bot)
+    updater = Updater(token=CONFIGURATION.tokens.telegram_bot)
     dispatcher = updater.dispatcher
 
-    handlers = [
+    hs = [
         ConversationHandler(
-            entry_points=[CommandHandler('start', start)],
+            entry_points=[CommandHandler('start', handlers.start)],
             states={
-                PERIOD_CHOOSING: [RegexHandler('^(Day|Week|Month|Quarter|Half a year|Year|Overall|Custom)$', period)]
+                SUBJECT_CHOOSING: [RegexHandler('^({})$'.format(keyboard_to_regex(handlers.keyboards['subjects'])),
+                                                handlers.subject_selector)],
+
+                GRAPH_CHOOSING: [RegexHandler('^({})$'.format(keyboard_to_regex(handlers.keyboards['graphs'])),
+                                              handlers.graph_selector)],
+
+                PERIOD_CHOOSING: [RegexHandler('^({})$'.format(keyboard_to_regex(handlers.keyboards['periods'])),
+                                               handlers.period_selector),
+                                  RegexHandler('^Something else...$',
+                                               handlers.custom_period_selector)
+                                  ],
             },
-            fallbacks=[RegexHandler('^Done$', done, pass_user_data=True)]
+            fallbacks=[RegexHandler('^Done$', handlers.done, pass_user_data=True)]
         ),
-        CommandHandler('artists', artists, pass_args=True),
-        CommandHandler('default_username', default_username, pass_args=True),
+        CommandHandler('visu', handlers.visu, pass_args=True),
+        CommandHandler('guide', handlers.guide),
+        CommandHandler('faq', handlers.faq),
+        CommandHandler('examples', handlers.examples, pass_args=True),
+        CommandHandler('set_username', handlers.set_username, pass_args=True),
+        CommandHandler('abort', handlers.abort)
     ]
-    for handler in handlers:
+
+    for handler in hs:
         dispatcher.add_handler(handler)
-    dispatcher.add_error_handler(error)
+    dispatcher.add_error_handler(handlers.error)
 
     updater.start_polling()
     updater.idle()

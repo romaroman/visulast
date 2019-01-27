@@ -1,27 +1,19 @@
 import json
-import sys
 import errno as err
 import utils
 import os
 
 from logger import get_logger
+from utils import errmsg
 
 path = os.path.dirname(os.path.abspath(__file__))
-PROJ_PATH = path[:9 + path.find('visulast')]
-
 logger = get_logger(__name__)
-
 DB_ENGINES = ['postgresql', 'sqlite']
-
-
-def errmsg(msg, e=None, code=-1):
-    logger.error('Configuration error\n{}\n\n{}' % msg % e)
-    # print(msg + '.\nChange configuration at config.json\n' % e)
-    sys.exit(code)
+PROJ_PATH = path[:9 + path.find('visulast')]
 
 
 class Configuration(metaclass=utils.Singleton):
-    class Tokens:
+    class TokensConfig:
         def __init__(self, tokens):
             self.google_maps_api = tokens['google.maps.api']
             self.telegram_bot = tokens['telegram.bot']
@@ -29,7 +21,7 @@ class Configuration(metaclass=utils.Singleton):
             self.aws_service = tokens['aws.service']
             self.docker_hub = tokens['docker.hub']
 
-    class Database:
+    class DatabaseConfig:
         def __init__(self, dbconfig):
             try:
                 self.engine = dbconfig['engine']
@@ -38,9 +30,8 @@ class Configuration(metaclass=utils.Singleton):
                 self.password = dbconfig['password']
                 self.hostname = dbconfig['hostname']
                 self.port = dbconfig['port']
-            except KeyError as e:
+            except KeyError:
                 pass
-                #errmsg('Uncorrect credits, check database configuration', e)
 
         def get_sql_url(self):
 
@@ -67,8 +58,8 @@ class Configuration(metaclass=utils.Singleton):
     def __init__(self, engine='default'):
         try:
             self.json_loader(PROJ_PATH + 'config.json')
-            self.tokens = Configuration.Tokens(self.config['tokens'])
-            self.database = Configuration.Database(self.config['database'][engine])
+            self.tokens = Configuration.TokensConfig(self.config['tokens'])
+            self.database = Configuration.DatabaseConfig(self.config['database'][engine])
 
             self.app_name = self.config['appName']
             self.app_version = self.config['appVersion']
