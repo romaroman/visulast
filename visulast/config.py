@@ -14,11 +14,11 @@ def critical_error_handler(msg, e=None, code=-1):
 
 
 class Configuration(metaclass=Singleton):
-    def __init__(self, engine='default'):
+    def __init__(self):
         try:
             self.json_loader(PROJ_PATH + 'config.json')
             self.tokens = Configuration.TokensConfig(self.config['tokens'])
-            self.database = Configuration.DatabaseConfig(self.config['database'][engine])
+            self.database = Configuration.DatabaseConfig(self.config['database'])
 
             self.app_name = self.config['appName']
             self.app_version = self.config['appVersion']
@@ -81,4 +81,4 @@ class Configuration(metaclass=Singleton):
                 critical_error_handler('{} engine not yet implemented'.format(self.engine))
 
 
-CONFIGURATION = Configuration('default')
+CONFIGURATION = Configuration()
