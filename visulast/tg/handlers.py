@@ -1,5 +1,5 @@
 from functools import wraps
-import telegram
+from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup
 from telegram.ext import ConversationHandler
 
 import logger
@@ -7,7 +7,7 @@ from core import controllers
 
 
 logger = logger.get_logger(__name__)
-PERIOD_CHOOSING, TYPE_CHOOSING = range(2)
+SUBJECT_CHOOSING, GRAPH_CHOOSING, PERIOD_CHOOSING = range(3)
 
 
 states = {
@@ -41,7 +41,10 @@ def send_action(action):
 
 # <editor-fold desc="Globals">
 def start(bot, update):
-    update.message.reply_text('Hi! I am your personal last.fm plotter')
+    reply_markup = ReplyKeyboardMarkup(keyboards['subjects'], one_time_keyboard=True)
+    logger.info("At visu")
+    bot.send_message(chat_id=update.message.chat_id, text="Choose what to visualize", reply_markup=reply_markup)
+    return SUBJECT_CHOOSING
 
 
 def done(bot, update, user_data):
@@ -55,7 +58,10 @@ def done(bot, update, user_data):
 
 
 def visu(bot, update):
-    raise NotImplemented
+    reply_markup = ReplyKeyboardMarkup(keyboards['subjects'], one_time_keyboard=True)
+    logger.info("At visu")
+    bot.send_message(chat_id=update.message.chat_id, text="Choose what to visualize", reply_markup=reply_markup)
+    return SUBJECT_CHOOSING
 
 
 def abort(bot, update):
@@ -83,19 +89,28 @@ def set_username(bot, update, args):
 
 # <editor-fold desc="Selectors">
 def period_selector(bot, update):
-    reply_markup = telegram.ReplyKeyboardMarkup(keyboards['period'], one_time_keyboard=True)
+    reply_markup = ReplyKeyboardMarkup(keyboards['period'], one_time_keyboard=True)
     bot.send_message(chat_id=update.message.chat_id, text="Choose interval", reply_markup=reply_markup)
 
 
 def graph_selector(bot, update):
-    reply_markup = telegram.ReplyKeyboardMarkup(keyboards['graphs'], one_time_keyboard=True)
+    reply_markup = ReplyKeyboardMarkup(keyboards['graphs'], one_time_keyboard=True)
     bot.send_message(chat_id=update.message.chat_id, text="Choose graph style", reply_markup=reply_markup)
     return
 
 
-def subject_selector(bot, update):
-    reply_markup = telegram.ReplyKeyboardMarkup(keyboards['subjects'], one_time_keyboard=True)
-    bot.send_message(chat_id=update.message.chat_id, text="Choose what to visualize", reply_markup=reply_markup)
+def subject_selector(bot, update, user_data):
+    user = update.message.from_user
+    text = update.message.text
+    print(text)
+    logger.info("Info %s: %s", user.first_name, update.message.text)
+    user_data['choice'] = text
+    update.message.reply_text('I see! Please send me a photo of yourself, '
+                              'so I know what you look like, or send /skip if you don\'t want to.',
+                              reply_markup=ReplyKeyboardRemove())
+    reply_markup = ReplyKeyboardMarkup(keyboards['period'], one_time_keyboard=True)
+    bot.send_message(chat_id=update.message.chat_id, text="Choose interval", reply_markup=reply_markup)
+    return PERIOD_CHOOSING
 
 
 def custom_period_selector(bot, update):

@@ -16,9 +16,9 @@ from matplotlib.colorbar import ColorbarBase
 from matplotlib.colors import Normalize, rgb2hex
 
 import logger
-from config import PROJ_PATH
 from loaders import SHAPE_FILE, SHAPE_READING_FIELD
-
+from utils import deprecated
+from globals import PROJ_PATH
 
 logger = logger.get_logger(__name__)
 
@@ -28,7 +28,7 @@ class _View:
         super().__init__(*args, **kwargs)
         self.name = name
 
-    def draw_world_map(self, data):
+    def draw_world_map_basemap(self, data):
         pass
 
     def draw_histogram(self):
@@ -43,7 +43,8 @@ class UserView(_View):
     def __init__(self, name='noname'):
         super(UserView, self).__init__(name)
 
-    def draw_world_map(self, data):
+    @deprecated
+    def draw_world_map_basemap(self, data):
         """
         :param data: dictionary with scrobble info of user's lib
                           example : {'Russia': 200, 'Japan': 100}
@@ -90,5 +91,5 @@ class UserView(_View):
 if __name__ == '__main__':
     logger.debug('drawing')
     a = UserView()
-    a.draw_world_map({'Russia': 20})
+    a.draw_world_map_basemap({'Russia': 20})
     # UserView.draw_countries(CountryOfArtistScrapper.get_all_scrobbles_by_username('niedego', 1), 'niedego')

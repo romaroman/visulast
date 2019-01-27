@@ -4,6 +4,8 @@ import logger
 from config import CONFIGURATION
 import tg.handlers as handlers
 from utils import keyboard_to_regex
+
+
 logger = logger.get_logger(__name__)
 SUBJECT_CHOOSING, GRAPH_CHOOSING, PERIOD_CHOOSING = range(3)
 
@@ -17,15 +19,15 @@ def main():
             entry_points=[CommandHandler('start', handlers.start)],
             states={
                 SUBJECT_CHOOSING: [RegexHandler('^({})$'.format(keyboard_to_regex(handlers.keyboards['subjects'])),
-                                                handlers.subject_selector)],
+                                                handlers.subject_selector, pass_user_data=True)],
 
                 GRAPH_CHOOSING: [RegexHandler('^({})$'.format(keyboard_to_regex(handlers.keyboards['graphs'])),
-                                              handlers.graph_selector)],
+                                              handlers.graph_selector, pass_user_data=True)],
 
                 PERIOD_CHOOSING: [RegexHandler('^({})$'.format(keyboard_to_regex(handlers.keyboards['periods'])),
-                                               handlers.period_selector),
+                                               handlers.period_selector, pass_user_data=True),
                                   RegexHandler('^Something else...$',
-                                               handlers.custom_period_selector)
+                                               handlers.custom_period_selector, pass_user_data=True)
                                   ],
             },
             fallbacks=[RegexHandler('^Done$', handlers.done, pass_user_data=True)]

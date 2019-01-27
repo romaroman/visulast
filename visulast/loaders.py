@@ -1,6 +1,6 @@
 import shapefile as shp
 
-from config import PROJ_PATH
+from globals import PROJ_PATH
 import logger
 
 logger = logger.get_logger(__name__)

@@ -1,15 +1,13 @@
 import json
 import errno as err
 import utils
-import os
 
 from logger import get_logger
-from utils import errmsg
+from utils import critical_error_handler
+from globals import PROJ_PATH
 
-path = os.path.dirname(os.path.abspath(__file__))
 logger = get_logger(__name__)
 DB_ENGINES = ['postgresql', 'sqlite']
-PROJ_PATH = path[:9 + path.find('visulast')]
 
 
 class Configuration(metaclass=utils.Singleton):
@@ -22,7 +20,7 @@ class Configuration(metaclass=utils.Singleton):
             self.app_name = self.config['appName']
             self.app_version = self.config['appVersion']
         except (KeyError, TypeError) as e:
-            errmsg('Something went wrong', e)
+            critical_error_handler('Something went wrong', e)
 
     def json_loader(self, file):
         try:
@@ -30,9 +28,9 @@ class Configuration(metaclass=utils.Singleton):
                 try:
                     self.config = json.load(jfile)
                 except (TypeError, json.JSONDecodeError) as e:
-                    errmsg("Couldn\'t decode {} file, check it\'s validity".format(file), e)
+                    critical_error_handler("Couldn\'t decode {} file, check it\'s validity".format(file), e)
         except FileNotFoundError as e:
-            errmsg('File {} not found, check if it exists in {}'.format(file, PROJ_PATH), e, err.ENFILE)
+            critical_error_handler('File {} not found, check if it exists in {}'.format(file, PROJ_PATH), e, err.ENFILE)
 
     class TokensConfig:
         def __init__(self, tokens):
@@ -58,7 +56,7 @@ class Configuration(metaclass=utils.Singleton):
         def _get_sql_url(self):
 
             if self.engine not in DB_ENGINES:
-                errmsg('Incorrect database engine', SystemError)
+                critical_error_handler('Incorrect database engine', SystemError)
 
             elif self.engine == 'postgresql':
                 try:
@@ -69,15 +67,15 @@ class Configuration(metaclass=utils.Singleton):
                     return 'postgresql://{}{}@{}{}/{}'. \
                         format(self.username, self.password, self.hostname, self.port, self.dbname)
                 except KeyError as e:
-                    errmsg('Uncorrect credits, at {} engine'.format(self.engine), e)
+                    critical_error_handler('Uncorrect credits, at {} engine'.format(self.engine), e)
 
             elif self.engine == 'sqlite':
                 try:
                     return 'sqlite:///{}.sqlite'.format(self.dbname)
                 except KeyError as e:
-                    errmsg('Uncorrect credits, at {} engine'.format(self.engine), e)
+                    critical_error_handler('Uncorrect credits, at {} engine'.format(self.engine), e)
             else:
-                errmsg('This engine not yet implemented')
+                critical_error_handler('{} engine not yet implemented'.format(self.engine))
 
 
 CONFIGURATION = Configuration('default')
