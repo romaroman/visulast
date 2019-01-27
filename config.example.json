@@ -1,0 +1,19 @@
+{
+  "appName": "visulast",
+  "appVersion": "0.1",
+  "database" : {
+    "engine" : "postgresql",
+    "dbname" : "visualastdb",
+    "username" : "postgres",
+    "password" : "",
+    "hostname" : "127.0.0.1",
+    "port" : "5432"
+  },
+  "tokens" : {
+    "google.maps.api" : "",
+    "telegram.bot" : "",
+    "last.fm": "",
+    "aws.service" : "",
+    "docker.hub" : ""
+  }
+}
