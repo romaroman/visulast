@@ -1,11 +1,23 @@
 # Singleton template for using in Configuration and others classes
-import sys
+import logging
+import os
 
-from logger import get_logger
 import warnings
 import functools
+import logging.config
+import yaml
 
-logger = get_logger(__name__)
+_path = os.path.dirname(os.path.abspath(__file__))
+PROJ_PATH = _path[:9 + _path.find('visulast')]
+
+
+with open(PROJ_PATH + 'logger.yaml', 'r+') as f:
+    config = yaml.safe_load(f.read())
+    logging.config.dictConfig(config)
+
+
+def get_logger(name):
+    return logging.getLogger(name)
 
 
 class Singleton(type):
@@ -23,11 +35,6 @@ def keyboard_to_regex(keyboard):
         for button in row:
             res += button + "|"
     return res[:-1]
-
-
-def critical_error_handler(msg, e=None, code=-1):
-    logger.critical('Cricitical error at {}\n{}\n\n{}' % __name__ % msg % e)
-    sys.exit(code)
 
 
 def deprecated(func):

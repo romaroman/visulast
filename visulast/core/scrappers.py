@@ -8,7 +8,7 @@ import wikipedia as wiki
 import googlemaps as gmaps
 import musicbrainzngs as mbz
 
-from logger import get_logger
+from utils import get_logger
 from loaders import COUNTRIES
 from config import CONFIGURATION
 

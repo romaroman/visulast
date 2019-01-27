@@ -1,8 +1,7 @@
 from core import scrappers
-import logger
+from utils import get_logger
 
-
-logger = logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class _Model:

@@ -1,12 +1,10 @@
 from telegram.ext import Updater, ConversationHandler, CommandHandler, RegexHandler
 
-import logger
 from config import CONFIGURATION
 import tg.handlers as handlers
-from utils import keyboard_to_regex
+from utils import keyboard_to_regex, get_logger
 
-
-logger = logger.get_logger(__name__)
+logger = get_logger(__name__)
 SUBJECT_CHOOSING, GRAPH_CHOOSING, PERIOD_CHOOSING = range(3)
 
 

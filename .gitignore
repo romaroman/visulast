@@ -111,4 +111,4 @@ cache/
 logs/
 out/
 *.csv
-snippets.py
+snippets.txt

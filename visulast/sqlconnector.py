@@ -1,13 +1,9 @@
-import os
-import sys
-
 from sqlalchemy import Column, ForeignKey, Integer, String, Date, LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 
-from config import Configuration
 
 Base = declarative_base()
 
@@ -30,11 +26,3 @@ class Result(Base):
 
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship(User)
-
-
-if __name__ == "__main__":
-    engine = create_engine(
-        Configuration('postgresql').database.get_sql_url())
-    if not database_exists(engine.url):
-        create_database(engine.url)
-    Base.metadata.create_all(engine)

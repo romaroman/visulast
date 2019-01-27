@@ -2,11 +2,11 @@ from functools import wraps
 from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup
 from telegram.ext import ConversationHandler
 
-import logger
+from utils import get_logger
 from core import controllers
 
 
-logger = logger.get_logger(__name__)
+logger = get_logger(__name__)
 SUBJECT_CHOOSING, GRAPH_CHOOSING, PERIOD_CHOOSING = range(3)
 
 

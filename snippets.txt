@@ -1,0 +1,14 @@
+@send_action(telegram.ChatAction.UPLOAD_PHOTO)
+def artists(bot, update, args):
+    controller = controllers.UserController(args[0], update.message.chat_id)
+    file = controller.scrobbles_world_map(1)
+    bot.send_photo(chat_id=update.message.chat_id, caption='Your map bro)',
+                   photo=open(file, 'rb'))
+    return PERIOD_CHOOSING
+    bot.send_message(chat_id=update.message.chat_id, text="Sending photo!")
+
+
+
+#<editor-fold desc="Description">
+...
+#</editor-fold>

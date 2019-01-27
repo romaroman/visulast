@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 from config import CONFIGURATION
-from globals import PROJ_PATH
+from utils import PROJ_PATH
 
 with open(PROJ_PATH + 'README.md') as f:
     readme = f.read()

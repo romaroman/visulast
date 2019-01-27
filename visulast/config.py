@@ -1,16 +1,19 @@
 import json
 import errno as err
-import utils
+import sys
 
-from logger import get_logger
-from utils import critical_error_handler
-from globals import PROJ_PATH
+from utils import get_logger, PROJ_PATH, Singleton
 
 logger = get_logger(__name__)
 DB_ENGINES = ['postgresql', 'sqlite']
 
 
-class Configuration(metaclass=utils.Singleton):
+def critical_error_handler(msg, e=None, code=-1):
+    logger.critical('Cricitical error at {}\n{}\n\n{}' % __name__ % msg % e)
+    sys.exit(code)
+
+
+class Configuration(metaclass=Singleton):
     def __init__(self, engine='default'):
         try:
             self.json_loader(PROJ_PATH + 'config.json')

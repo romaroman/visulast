@@ -1,9 +1,8 @@
 import shapefile as shp
 
-from globals import PROJ_PATH
-import logger
+from utils import get_logger, PROJ_PATH
 
-logger = logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 SHAPE_FILE = PROJ_PATH + "assets/shapefiles/worldmaps/small/ne_10m_admin_0_countries_lakes"
 SHAPE_READING_FIELD = "countries"
