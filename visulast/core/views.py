@@ -1,22 +1,14 @@
 import numpy as np
 from datetime import datetime
 
-import os
-import conda
-
-conda_file_dir = conda.__file__
-conda_dir = conda_file_dir.split('lib')[0]
-proj_lib = os.path.join(os.path.join(conda_dir, 'share'), 'proj')
-os.environ["PROJ_LIB"] = proj_lib
-
+import shapefile as shp
 import matplotlib.pyplot as plt
+from matplotlib.figure import figaspect
 from matplotlib.patches import Polygon
-from mpl_toolkits.basemap import Basemap
-from matplotlib.colorbar import ColorbarBase
-from matplotlib.colors import Normalize, rgb2hex
+from matplotlib.colors import rgb2hex
 
-from loaders import SHAPE_FILE, SHAPE_READING_FIELD
-from utils import deprecated, get_logger, PROJ_PATH
+from loaders import SHAPE_FILE
+from utils import get_logger, PROJ_PATH
 
 logger = get_logger(__name__)
 
@@ -41,53 +33,64 @@ class UserView(_View):
     def __init__(self, name='noname'):
         super(UserView, self).__init__(name)
 
-    @deprecated
-    def draw_world_map_basemap(self, data):
-        """
-        :param data: dictionary with scrobble info of user's lib
-                          example : {'Russia': 200, 'Japan': 100}
-        :return path of saved .png plot
-        """
-        m = Basemap(projection='mill', llcrnrlat=-60, urcrnrlat=90,
-                    llcrnrlon=-180, urcrnrlon=180, resolution='c')
-        fig, ax = plt.subplots()
-        m.readshapefile(SHAPE_FILE, SHAPE_READING_FIELD)
-
-        vmin, vmax = 0, max(data.values(), key=lambda i: i)
-        norm = Normalize(vmin=vmin, vmax=vmax)
+    def get_colour_scale(self, data):
+        cmin, cmax = 0, max(data.values(), key=lambda i: i)
         colors = {}
-        cmap = plt.cm.Accent
-        coloured_countries = list()
+        cmap = plt.cm.RdPu
 
-        for shapedict in m.countries_info:
-            statename = shapedict['SOVEREIGNT']
-            if statename not in coloured_countries and statename in data.keys():
-                comp = data[statename]
-                colors[statename] = cmap(np.sqrt((comp - vmin) / (vmax - vmin)))[:3]
-                coloured_countries.append(statename)
+        for key, value in data.items():
+            colors[key] = cmap(np.sqrt((value - cmin) / (cmax - cmin)))[:3]
 
-        for seg, info in zip(m.countries, m.countries_info):
-            if info['SOVEREIGNT'] in data.keys():
-                color = rgb2hex(colors[info['SOVEREIGNT']])
-                poly = Polygon(seg, facecolor=color)
-                ax.add_patch(poly)
+        return colors
 
-        plt.title('Map of {}\'s most listened countries'.format(self.name))
+    def draw_world_map_matplotlib(self, data):
+        fig = plt.figure(figsize=figaspect(0.5))
+        ax = plt.Axes(fig, [0.025, 0, 0.95, 1])
+        ax.set_axis_off()
+        ax.set_xlim(-180, 180)
+        ax.set_ylim(-70, 90)
+        fig.add_axes(ax)
 
-        ax_c = fig.add_axes([0.2, 0.1, 0.6, 0.03])
-        cb = ColorbarBase(ax_c, cmap=cmap, norm=norm, orientation='horizontal',
-                          label=r'[number of scrobbles per country]')
+        shapes = shp.Reader(SHAPE_FILE, encodingErrors="replace")
+        colours = self.get_colour_scale(data)
+
+        for item in shapes.iterShapeRecords():
+            country = item.record['SOVEREIGNT']
+            if country == 'Antarctica':
+                continue
+            if country in data.keys():
+                color = colours[country]
+            else:
+                color = (1, 1, 1)
+
+            points = item.shape.points
+            parts = item.shape.parts
+            for i in range(len(parts)):
+                ax.add_patch(Polygon(
+                    points[parts[i]:] if i == len(parts) - 1 else
+                    points[parts[i]:parts[i + 1]],
+                    facecolor=rgb2hex(color),
+                    edgecolor='k',
+                    linewidth=0.5
+                ))
 
         filename = '{}out/graphs/worldmaps/{}_{}.png'.format(
-            PROJ_PATH, self.name, str(datetime.now().time())[:8]
-        )
-
-        plt.savefig(filename, dpi=200)
+                    PROJ_PATH, self.name, str(datetime.now().time())[:8])
+        plt.show()
+        # plt.savefig(filename, dpi=200)
         return filename
 
 
 if __name__ == '__main__':
     logger.debug('drawing')
     a = UserView()
-    a.draw_world_map_basemap({'Russia': 20})
+    D = {
+        'Russia': 10,
+        'China': 25,
+        'United Kingdom': 50,
+        'United States of America': 75,
+        'Australia': 100
+    }
+    a.draw_world_map_matplotlib(D)
+    # print(a.get_colour_scale({'Russia' : 1, 'China' : 2}))
     # UserView.draw_countries(CountryOfArtistScrapper.get_all_scrobbles_by_username('niedego', 1), 'niedego')
