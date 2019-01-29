@@ -1,6 +1,6 @@
 from telegram.ext import Updater, ConversationHandler, CommandHandler, RegexHandler
 
-from config import CONFIGURATION
+from config import Configuration
 import tg.handlers as handlers
 from utils import keyboard_to_regex, get_logger
 
@@ -9,7 +9,7 @@ SUBJECT_CHOOSING, GRAPH_CHOOSING, PERIOD_CHOOSING = range(3)
 
 
 def main():
-    updater = Updater(token=CONFIGURATION.tokens.telegram_bot)
+    updater = Updater(token=Configuration().tokens.telegram_bot)
     dispatcher = updater.dispatcher
 
     hs = [

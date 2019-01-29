@@ -79,6 +79,3 @@ class Configuration(metaclass=Singleton):
                     critical_error_handler('Uncorrect credits, at {} engine'.format(self.engine), e)
             else:
                 critical_error_handler('{} engine not yet implemented'.format(self.engine))
-
-
-CONFIGURATION = Configuration()

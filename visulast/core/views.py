@@ -7,10 +7,21 @@ from matplotlib.figure import figaspect
 from matplotlib.patches import Polygon
 from matplotlib.colors import rgb2hex
 
-from loaders import SHAPE_FILE
-from utils import get_logger, PROJ_PATH
+from visulast.core import models
+from utils import get_logger, PROJ_PATH, SHAPE_FILE
 
 logger = get_logger(__name__)
+
+
+def get_colour_scale(data):
+    cmin, cmax = 0, max(data.values(), key=lambda i: i)
+    colors = {}
+    cmap = plt.cm.RdPu
+
+    for key, value in data.items():
+        colors[key] = cmap(np.sqrt((value - cmin) / (cmax - cmin)))[:3]
+
+    return colors
 
 
 class _View:
@@ -33,31 +44,18 @@ class UserView(_View):
     def __init__(self, name='noname'):
         super(UserView, self).__init__(name)
 
-    def get_colour_scale(self, data):
-        cmin, cmax = 0, max(data.values(), key=lambda i: i)
-        colors = {}
-        cmap = plt.cm.RdPu
-
-        for key, value in data.items():
-            colors[key] = cmap(np.sqrt((value - cmin) / (cmax - cmin)))[:3]
-
-        return colors
-
     def draw_world_map_matplotlib(self, data):
         fig = plt.figure(figsize=figaspect(0.5))
         ax = plt.Axes(fig, [0.025, 0, 0.95, 1])
         ax.set_axis_off()
         ax.set_xlim(-180, 180)
-        ax.set_ylim(-70, 90)
+        ax.set_ylim(-60, 90)
         fig.add_axes(ax)
-
         shapes = shp.Reader(SHAPE_FILE, encodingErrors="replace")
-        colours = self.get_colour_scale(data)
+        colours = get_colour_scale(data)
 
         for item in shapes.iterShapeRecords():
             country = item.record['SOVEREIGNT']
-            if country == 'Antarctica':
-                continue
             if country in data.keys():
                 color = colours[country]
             else:
@@ -91,6 +89,7 @@ if __name__ == '__main__':
         'United States of America': 75,
         'Australia': 100
     }
-    a.draw_world_map_matplotlib(D)
+    #a.draw_world_map_matplotlib(D)
     # print(a.get_colour_scale({'Russia' : 1, 'China' : 2}))
-    # UserView.draw_countries(CountryOfArtistScrapper.get_all_scrobbles_by_username('niedego', 1), 'niedego')
+    m = models.UserModel(name='niedego', chat_id='1111')
+    a.draw_world_map_matplotlib(m.get_for_all_countries(what='s', limit=2))

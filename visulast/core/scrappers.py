@@ -1,3 +1,4 @@
+import uuid
 import re
 import requests
 from bs4 import BeautifulSoup
@@ -8,14 +9,15 @@ import wikipedia as wiki
 import googlemaps as gmaps
 import musicbrainzngs as mbz
 
-from utils import get_logger
-from loaders import COUNTRIES
-from config import CONFIGURATION
+from config import Configuration
+from utils import get_logger, extract_countries
 
+legal_countries = extract_countries()
 logger = get_logger(__name__)
-lastfm_client = pylast.LastFMNetwork(api_key=CONFIGURATION.tokens.last_fm)
-gmaps_client = gmaps.Client(key=CONFIGURATION.tokens.google_maps_api)
-mbz.set_useragent(app=CONFIGURATION.app_name, version=CONFIGURATION.app_version)
+lastfm_client = pylast.LastFMNetwork(api_key=Configuration().tokens.last_fm)
+gmaps_client = gmaps.Client(key=Configuration().tokens.google_maps_api)
+mbz.set_useragent(app=Configuration().app_name, version=Configuration().app_version)
+session = uuid.uuid4()
 
 
 class CountryOfArtistScrapper:
@@ -29,22 +31,22 @@ class CountryOfArtistScrapper:
             'United Kingdom': ['U.K.', 'UK', 'Scotland', 'Wales', 'England', 'Northern Ireland'],
             'Russia': ['Russian Federation', 'Soviet Union']
         }
-        for k, v in norm_dict.items():
-            for c in v:
-                if blob == c:
-                    return k
+        for key, value in norm_dict.items():
+            for country in value:
+                if blob == country:
+                    return key
         return blob
 
     @staticmethod
     def normalize_with_gmaps(query):
-        predictions = gmaps_client.places_autocomplete(input_text=query)
+        predictions = gmaps_client.places_autocomplete(input_text=query, session_token=session)
         for p in predictions:
             if 'locality' in p["types"] and 'political' in p["types"]:
-                if p["terms"][0]["value"] in COUNTRIES:
+                if p["terms"][0]["value"] in legal_countries:
                     return p["terms"][0]["value"]
                 for term in p["terms"]:
                     norm_term = CountryOfArtistScrapper.normalize_with_dictionary(term["value"])
-                    if norm_term in COUNTRIES:
+                    if norm_term in legal_countries:
                         return norm_term
 
     @staticmethod
@@ -58,7 +60,7 @@ class CountryOfArtistScrapper:
                 if word[0].isupper():
                     try:
                         pos_country = CountryOfArtistScrapper.normalize_with_dictionary(word)
-                        if pos_country in COUNTRIES:
+                        if pos_country in legal_countries:
                             country_occur[pos_country] += 1
                     except KeyError:
                         pass
@@ -110,7 +112,7 @@ class CountryOfArtistScrapper:
                 )
             except AttributeError:
                 return summary_parser(page.summary)
-            if res_country in COUNTRIES:
+            if res_country in legal_countries:
                 return res_country
             return summary_parser(page.summary)
         else:
@@ -130,7 +132,7 @@ class CountryOfArtistScrapper:
             locations = facts.strip(',')
             for l in locations:
                 nl = CountryOfArtistScrapper.normalize_with_dictionary(l)
-                if nl in COUNTRIES:
+                if nl in legal_countries:
                     return nl
             return CountryOfArtistScrapper.normalize_with_gmaps(facts)
         except (AttributeError, KeyError):
@@ -143,7 +145,7 @@ class CountryOfArtistScrapper:
                 if word[0].isupper():
                     try:
                         possible_country = CountryOfArtistScrapper.normalize_with_dictionary(word)
-                        if possible_country in COUNTRIES:
+                        if possible_country in legal_countries:
                             country_occur[possible_country] += 1
                     except KeyError:
                         pass
@@ -156,9 +158,9 @@ class CountryOfArtistScrapper:
             try:
                 mb_art = mbz.get_artist_by_id(id=mbid)
                 country = mb_art['artist']['area']['name']
-                if country not in COUNTRIES:
+                if country not in legal_countries:
                     country = CountryOfArtistScrapper.normalize_with_dictionary(country)
-                if country not in COUNTRIES:
+                if country not in legal_countries:
                     country = CountryOfArtistScrapper.normalize_with_gmaps(country)
                 return country
             except KeyError:
@@ -177,8 +179,9 @@ class CountryOfArtistScrapper:
     @staticmethod
     def get_one(lastfm_artist):
         country = CountryOfArtistScrapper.get_from_musicbrainz(lastfm_artist)
-        if country not in COUNTRIES:
+        if country not in legal_countries:
             country = CountryOfArtistScrapper.get_from_lastfm_summary(lastfm_artist)
+        logger.error("Artist:\t{}\tCountry:{}\n".format(lastfm_artist.name, country))
         return country
 
     @staticmethod

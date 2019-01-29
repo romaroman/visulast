@@ -29,7 +29,6 @@ class UserModel(_Model):
         countries = {}
         for i in self.library.get_artists(limit=limit):
             country = scrappers.CountryOfArtistScrapper.get_one(i.item)
-            logger.info("{}\t{}\t".format(i.item.name, country))
             v = 1
             if what == 's':
                 v = i.playcount

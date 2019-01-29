@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-from config import CONFIGURATION
+from config import Configuration()
 from utils import PROJ_PATH
 
 with open(PROJ_PATH + 'README.md') as f:
@@ -9,8 +9,8 @@ with open(PROJ_PATH + 'LICENSE') as f:
     license = f.read()
 
 setup(
-    name=CONFIGURATION.app_name,
-    version=CONFIGURATION.app_version,
+    name=Configuration().app_name,
+    version=Configuration().app_version,
     description='Another implementation of Last.fm visualization',
     long_description=readme,
     author='romaroman',
