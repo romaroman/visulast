@@ -1,10 +1,11 @@
 from functools import wraps
+import pylast
 import telegram
 from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup
 from telegram.ext import ConversationHandler
-
 from utils import get_logger
 from core import controllers
+from core.scrappers import lastfm_client
 
 
 logger = get_logger(__name__)
@@ -58,18 +59,22 @@ def examples(bot, update):
     raise NotImplemented
 
 
-def set_username(bot, update, args):
-    username = " ".join(args)
-    update.message.reply_text("You've set default last.fm username to " + username)
-    bot.send_message(chat_id=update.message.chat_id, text=update.message.chat_id)
+# TODO: IMPLEMENT THIS
+def set_lastfm_username(bot, update, userdata):
+    try:
+        lastfm_client.get_user(update.message.text)
+        userdata['lastfm_username'] = update.message.text
+        update.message.reply_text("You've set your last.fm username to " + userdata['lastfm_username'])
+        return
+    except pylast.WSError:
+        update.message.reply_text("Such user doesn't exist try again or use /abort command to cancel")
+        return
 
 
 def done(bot, update, user_data):
-    if 'choice' in user_data:
-        del user_data['choice']
-
+    if user_data:
+        del user_data
     update.message.reply_text("Bye, bro!")
-
     user_data.clear()
     return ConversationHandler.END
 # </editor-fold>

@@ -118,11 +118,12 @@ class CountryOfArtistScrapper:
         else:
             return summary_parser(page.summary)
 
-    '''
-    param: pylast.Artist
-    '''
     @staticmethod
     def get_from_lastfm_summary(artist):
+        """
+        :param artist:  pylast.Artist object
+        :return: country for successful extraction, otherwise - None
+        """
         req = requests.get("https://www.last.fm/music/{}".format(artist.name.replace(' ', '+')))
         soup = BeautifulSoup(req.text, features="lxml")
         try:
