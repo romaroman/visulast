@@ -14,10 +14,10 @@ class UserController(_Controller):
         self.userview = views.UserView(username)
 
     def scrobbles_world_map(self, limit=5):
-        return self.userview.draw_world_map_basemap(self.usermodel.get_for_all_countries(what='s', limit=limit))
+        return self.userview.draw_world_map_matplotlib(self.usermodel.get_for_all_countries(what='s', limit=limit))
 
     def artist_amount_world_map(self, limit=5):
-        return self.userview.draw_world_map_basemap(self.usermodel.get_for_all_countries(what='a', limit=limit))
+        return self.userview.draw_world_map_matplotlib(self.usermodel.get_for_all_countries(what='a', limit=limit))
 
 
 if __name__ == '__main__':

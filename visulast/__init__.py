@@ -1,5 +1,4 @@
 from . import config
-from . import visulast
 from . import sqlconnector
 from . import utils
 

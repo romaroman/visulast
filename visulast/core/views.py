@@ -73,9 +73,9 @@ class UserView(_View):
                 ))
 
         filename = '{}out/graphs/worldmaps/{}_{}.png'.format(
-                    PROJ_PATH, self.name, str(datetime.now().time())[:8])
-        plt.show()
-        # plt.savefig(filename, dpi=200)
+                    PROJ_PATH, self.name, str(datetime.now()).replace(' ', '_')[:-7])
+        # plt.show()
+        plt.savefig(filename, dpi=200)
         return filename
 
 

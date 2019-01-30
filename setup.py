@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-from config import Configuration()
+from config import Configuration
 from utils import PROJ_PATH
 
 with open(PROJ_PATH + 'README.md') as f:

@@ -181,7 +181,7 @@ class CountryOfArtistScrapper:
         country = CountryOfArtistScrapper.get_from_musicbrainz(lastfm_artist)
         if country not in legal_countries:
             country = CountryOfArtistScrapper.get_from_lastfm_summary(lastfm_artist)
-        logger.error("Artist:\t{}\tCountry:{}\n".format(lastfm_artist.name, country))
+        logger.info("Artist:\t{}\tCountry:{}\n".format(lastfm_artist.name, country))
         return country
 
     @staticmethod

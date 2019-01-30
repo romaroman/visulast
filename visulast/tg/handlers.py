@@ -1,4 +1,5 @@
 from functools import wraps
+import telegram
 from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup
 from telegram.ext import ConversationHandler
 
@@ -7,20 +8,18 @@ from core import controllers
 
 
 logger = get_logger(__name__)
-SUBJECT_CHOOSING, GRAPH_CHOOSING, PERIOD_CHOOSING = range(3)
-
-
-states = {
-
-}
+CHOOSING_SUBJECT = 0
+CHOOSING_PERIOD = 1
+CHOOSING_GRAPH = 2
+NO_JOBS = 3
 
 keyboards = {
-    'subjects': [['Me', 'User', 'Followers'],
+    'subjects': [['Myself', 'User', 'Followers'],
                  ['Artist', 'Album', 'Followings'],
                  ['Country', 'Tag', 'Trends']],
     'periods': [['Today', 'Week', 'Month'],
-               ['Quartal', 'Half a year', 'Year'],
-               ['5 years', 'Overall', 'Custom']],
+                ['Quartal', 'Half a year', 'Year'],
+                ['5 years', 'Overall', 'Custom']],
     'graphs': [['Histogram', 'Worldmap', 'Flow'],
                ['Pie', 'Bar', 'Line'],
                ['Swarm', 'Hear', 'Cluster']]
@@ -41,28 +40,7 @@ def send_action(action):
 
 # <editor-fold desc="Globals">
 def start(bot, update):
-    reply_markup = ReplyKeyboardMarkup(keyboards['subjects'], one_time_keyboard=True)
-    logger.info("At visu")
-    bot.send_message(chat_id=update.message.chat_id, text="Choose what to visualize", reply_markup=reply_markup)
-    return SUBJECT_CHOOSING
-
-
-def done(bot, update, user_data):
-    if 'choice' in user_data:
-        del user_data['choice']
-
-    update.message.reply_text("Bye, bro!")
-
-    user_data.clear()
-    return ConversationHandler.END
-
-
-def visu(bot, update):
-    reply_markup = ReplyKeyboardMarkup(keyboards['subjects'], one_time_keyboard=True)
-    logger.info("At visu")
-    bot.send_message(chat_id=update.message.chat_id, text="Choose what to visualize", reply_markup=reply_markup)
-    return SUBJECT_CHOOSING
-
+    return NO_JOBS
 
 def abort(bot, update):
     raise NotImplemented
@@ -78,7 +56,6 @@ def faq(bot, update):
 
 def examples(bot, update):
     raise NotImplemented
-# </editor-fold>
 
 
 def set_username(bot, update, args):
@@ -87,34 +64,58 @@ def set_username(bot, update, args):
     bot.send_message(chat_id=update.message.chat_id, text=update.message.chat_id)
 
 
+def done(bot, update, user_data):
+    if 'choice' in user_data:
+        del user_data['choice']
+
+    update.message.reply_text("Bye, bro!")
+
+    user_data.clear()
+    return ConversationHandler.END
+# </editor-fold>
+
+
 # <editor-fold desc="Selectors">
-def period_selector(bot, update):
-    reply_markup = ReplyKeyboardMarkup(keyboards['period'], one_time_keyboard=True)
-    bot.send_message(chat_id=update.message.chat_id, text="Choose interval", reply_markup=reply_markup)
+def visu(bot, update):
+    reply_markup = ReplyKeyboardMarkup(keyboards['subjects'], one_time_keyboard=True)
+    bot.send_message(chat_id=update.message.chat_id,
+                     text="Okay, choose what subject from last.fm to analyze", reply_markup=reply_markup)
+    return CHOOSING_SUBJECT
 
 
-def graph_selector(bot, update):
+def subject_choice(bot, update, user_data):
+    user_data['subject'] = update.message.text
+    reply_markup = ReplyKeyboardMarkup(keyboards['periods'], one_time_keyboard=True)
+    bot.send_message(chat_id=update.message.chat_id,
+                     text="Nice, over what time you need your stats? (larger date - longer waiting)", reply_markup=reply_markup)
+    return CHOOSING_PERIOD
+
+
+def period_choice(bot, update, user_data):
+    user_data['period'] = update.message.text
+    update.message.reply_text("Okay, cool, there's left only to choose graph type")
     reply_markup = ReplyKeyboardMarkup(keyboards['graphs'], one_time_keyboard=True)
-    bot.send_message(chat_id=update.message.chat_id, text="Choose graph style", reply_markup=reply_markup)
-    return
+    bot.send_message(chat_id=update.message.chat_id, text="Okay, choose what to analyze", reply_markup=reply_markup)
+    return CHOOSING_GRAPH
 
 
-def subject_selector(bot, update, user_data):
-    user = update.message.from_user
-    text = update.message.text
-    print(text)
-    logger.info("Info %s: %s", user.first_name, update.message.text)
-    user_data['choice'] = text
-    update.message.reply_text('I see! Please send me a photo of yourself, '
-                              'so I know what you look like, or send /skip if you don\'t want to.',
-                              reply_markup=ReplyKeyboardRemove())
-    reply_markup = ReplyKeyboardMarkup(keyboards['period'], one_time_keyboard=True)
-    bot.send_message(chat_id=update.message.chat_id, text="Choose interval", reply_markup=reply_markup)
-    return PERIOD_CHOOSING
+def custom_period_choice(bot, update, user_data):
+    user_data['c_period'] = update.message.text
+    update.message.reply_text("Okay, cool, there's left only to choose graph type")
+    reply_markup = ReplyKeyboardMarkup(keyboards['graphs'], one_time_keyboard=True)
+    bot.send_message(chat_id=update.message.chat_id, text="Okay, choose what to analyze", reply_markup=reply_markup)
+    return CHOOSING_GRAPH
 
 
-def custom_period_selector(bot, update):
-    raise NotImplemented
+@send_action(telegram.ChatAction.UPLOAD_PHOTO)
+def graph_choice(bot, update, user_data):
+    user_data['graph'] = update.message.text
+    controller = controllers.UserController('niedego', update.message.chat_id)
+    file = controller.scrobbles_world_map(1)
+    bot.send_photo(chat_id=update.message.chat_id, caption='Your map bro)',
+                   photo=open(file, 'rb'))
+    return NO_JOBS
+
 # </editor-fold>
 
 
