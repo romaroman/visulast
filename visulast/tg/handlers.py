@@ -3,7 +3,7 @@ import pylast
 import telegram
 from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup
 from telegram.ext import ConversationHandler
-from utils import get_logger
+from utils.helpers import get_logger
 from core import controllers
 from core.scrappers import lastfm_client
 

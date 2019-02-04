@@ -1,5 +1,5 @@
 from core import views, models
-from utils import get_logger
+from utils.helpers import get_logger
 
 logger = get_logger(__name__)
 

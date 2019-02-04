@@ -2,7 +2,7 @@ from telegram.ext import Updater, ConversationHandler, CommandHandler, RegexHand
 
 from tg import handlers
 from config import Configuration
-from utils import keyboard_to_regex, get_logger
+from utils.helpers import keyboard_to_regex, get_logger
 
 logger = get_logger(__name__)
 

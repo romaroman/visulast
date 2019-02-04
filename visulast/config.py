@@ -2,7 +2,7 @@ import json
 import errno as err
 import sys
 
-from utils import get_logger, PROJ_PATH, Singleton
+from utils.helpers import get_logger, PROJ_PATH, Singleton
 
 logger = get_logger(__name__)
 DB_ENGINES = ['postgresql', 'sqlite']
