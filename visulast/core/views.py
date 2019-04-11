@@ -65,11 +65,8 @@ class UserView(_View):
             parts = item.shape.parts
             for i in range(len(parts)):
                 ax.add_patch(Polygon(
-                    points[parts[i]:] if i == len(parts) - 1 else
-                    points[parts[i]:parts[i + 1]],
-                    facecolor=rgb2hex(color),
-                    edgecolor='k',
-                    linewidth=0.5
+                    points[parts[i]:] if i == len(parts) - 1 else points[parts[i]:parts[i + 1]],
+                    facecolor=rgb2hex(color), edgecolor='k', linewidth=0.5
                 ))
 
         filename = '{}out/graphs/worldmaps/{}_{}.png'.format(

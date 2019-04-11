@@ -116,12 +116,20 @@ def custom_period_choice(bot, update, user_data):
 def graph_choice(bot, update, user_data):
     user_data['graph'] = update.message.text
     controller = controllers.UserController('niedego', update.message.chat_id)
-    file = controller.scrobbles_world_map(1)
+    file = controller.scrobbles_world_map(2)
     bot.send_photo(chat_id=update.message.chat_id, caption='Your map bro)',
                    photo=open(file, 'rb'))
     return NO_JOBS
 
 # </editor-fold>
+
+
+def set0(bot, update):
+    return 0
+
+
+def reset(bot, update):
+    return NO_JOBS
 
 
 def error(bot, update, error):

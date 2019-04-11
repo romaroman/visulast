@@ -30,19 +30,14 @@ def main():
                                   ],
                 CHOOSING_GRAPH: [RegexHandler('^({})$'.format(keyboard_to_regex(handlers.keyboards['graphs'])),
                                               handlers.graph_choice, pass_user_data=True)],
-                # GRAPH_CHOOSING: [RegexHandler('^({})$'.format(keyboard_to_regex(handlers.keyboards['graphs'])),
-                #                               handlers.graph_selector, pass_user_data=True)],
-
-                # CHOOSING_SUBJECT: [MessageHandler(Filters.text,
-                #                                   handlers.subject_choice, pass_user_data=True),
-                #                    ],
             },
-            fallbacks=[RegexHandler('^Done$', handlers.done, pass_user_data=True)]
+            fallbacks=[RegexHandler('^Done$', handlers.done, pass_user_data=True),
+                       CommandHandler('reset', handlers.reset),
+                       CommandHandler('set0', handlers.set0)]
         ),
         CommandHandler('guide', handlers.guide),
         CommandHandler('faq', handlers.faq),
         CommandHandler('examples', handlers.examples, pass_args=True),
-        CommandHandler('set_username', handlers.set_username, pass_args=True),
         CommandHandler('abort', handlers.abort)
     ]
 

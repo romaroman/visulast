@@ -89,8 +89,7 @@ class CountryOfArtistScrapper:
                     continue
                 except wiki.PageError:
                     continue
-            if not soup:
-                return None
+            return soup
         except wiki.PageError:
             return None
 
