@@ -1,5 +1,5 @@
-from core import views, models
-from utils.helpers import get_logger
+from visulast.core import views, models
+from visulast.utils.helpers import get_logger
 
 logger = get_logger(__name__)
 

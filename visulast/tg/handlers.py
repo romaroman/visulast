@@ -3,9 +3,9 @@ import pylast
 import telegram
 from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup
 from telegram.ext import ConversationHandler
-from utils.helpers import get_logger
-from core import controllers
-from core.scrappers import lastfm_client
+from visulast.utils.helpers import get_logger
+from visulast.core import controllers
+from visulast.core.scrappers import lastfm_client
 
 
 logger = get_logger(__name__)

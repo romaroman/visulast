@@ -8,7 +8,7 @@ from matplotlib.patches import Polygon
 from matplotlib.colors import rgb2hex
 
 from visulast.core import models
-from utils.helpers import get_logger, PROJ_PATH, SHAPE_FILE
+from visulast.utils.helpers import get_logger, PROJ_PATH, SHAPE_FILE
 
 logger = get_logger(__name__)
 

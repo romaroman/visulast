@@ -2,14 +2,14 @@ import json
 import errno as err
 import sys
 
-from utils.helpers import get_logger, PROJ_PATH, Singleton
+from visulast.utils.helpers import get_logger, PROJ_PATH, Singleton
 
 logger = get_logger(__name__)
 DB_ENGINES = ['postgresql', 'sqlite']
 
 
 def critical_error_handler(msg, e=None, code=-1):
-    logger.critical('Cricitical error at {}\n{}\n\n{}' % __name__ % msg % e)
+    logger.critical(f'Cricitical error at {str(__name__ )}\n{msg}\n\n{e}')
     sys.exit(code)
 
 
