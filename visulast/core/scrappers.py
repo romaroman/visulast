@@ -9,8 +9,8 @@ import wikipedia as wiki
 import googlemaps as gmaps
 import musicbrainzngs as mbz
 
-from config import Configuration
-from utils.helpers import get_logger, extract_countries
+from visulast.config import Configuration
+from visulast.utils.helpers import get_logger, extract_countries
 
 legal_countries = extract_countries()
 logger = get_logger(__name__)

@@ -1,8 +1,8 @@
 from telegram.ext import Updater, ConversationHandler, CommandHandler, RegexHandler, Filters, MessageHandler
 
-from tg import handlers
-from config import Configuration
-from utils.helpers import keyboard_to_regex, get_logger
+from visulast.tg import handlers
+from visulast.config import Configuration
+from visulast.utils.helpers import keyboard_to_regex, get_logger
 
 logger = get_logger(__name__)
 

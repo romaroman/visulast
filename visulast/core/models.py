@@ -1,5 +1,5 @@
-from core import scrappers
-from utils.helpers import get_logger
+from visulast.core import scrappers
+from visulast.utils.helpers import get_logger
 
 logger = get_logger(__name__)
 

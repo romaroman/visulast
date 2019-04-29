@@ -1,6 +1,6 @@
 import unittest
 
-from core.scrappers import CountryOfArtistScrapper
+from visulast.core.scrappers import CountryOfArtistScrapper
 
 
 class TestArtistScrappers(unittest.TestCase):
