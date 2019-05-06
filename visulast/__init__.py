@@ -1,5 +1,3 @@
-from . import config
-from . import sqlconnector
-from . import utils
+import visulast.config
 
 __version__ = config.Configuration().app_version

@@ -41,9 +41,6 @@ class _View:
 
 class UserView(_View):
 
-    def __init__(self, name='noname'):
-        super(UserView, self).__init__(name)
-
     def draw_world_map_matplotlib(self, data):
         fig = plt.figure(figsize=figaspect(0.5))
         ax = plt.Axes(fig, [0.025, 0, 0.95, 1])
@@ -69,11 +66,13 @@ class UserView(_View):
                     facecolor=rgb2hex(color), edgecolor='k', linewidth=0.5
                 ))
 
-        filename = '{}out/graphs/worldmaps/{}_{}.png'.format(
-                    PROJ_PATH, self.name, str(datetime.now()).replace(' ', '_')[:-7])
+        filename = f"{PROJ_PATH}/out/graphs/worldmaps/{self.name}_{str(datetime.now()).replace(' ', '_')[:-7]}.png"
         # plt.show()
         plt.savefig(filename, dpi=200)
         return filename
+
+    def __init__(self, name='noname'):
+        super(UserView, self).__init__(name)
 
 
 if __name__ == '__main__':

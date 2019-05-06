@@ -79,7 +79,7 @@ class CountryOfArtistScrapper:
             ]
             soup = None
             for var in possible_variants:
-                t_artist = artist + ' ({})'.format(var)
+                t_artist = artist + f' ({var})'
                 try:
                     page = wiki.page(t_artist)
                     if page:
@@ -123,7 +123,7 @@ class CountryOfArtistScrapper:
         :param artist:  pylast.Artist object
         :return: country for successful extraction, otherwise - None
         """
-        req = requests.get("https://www.last.fm/music/{}".format(artist.name.replace(' ', '+')))
+        req = requests.get(f"https://www.last.fm/music/{artist.name.replace(' ', '+')}")
         soup = BeautifulSoup(req.text, features="lxml")
         try:
             facts = soup.find("p", {"class": 'factbox-summary'}).string
@@ -181,7 +181,7 @@ class CountryOfArtistScrapper:
         country = CountryOfArtistScrapper.get_from_musicbrainz(lastfm_artist)
         if country not in legal_countries:
             country = CountryOfArtistScrapper.get_from_lastfm_summary(lastfm_artist)
-        logger.info("Artist:\t{}\tCountry:{}\n".format(lastfm_artist.name, country))
+        logger.info(f"Artist:\t{lastfm_artist.name}\tCountry:{country}\n")
         return country
 
     @staticmethod

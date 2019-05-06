@@ -31,9 +31,9 @@ class Configuration(metaclass=Singleton):
                 try:
                     self.config = json.load(jfile)
                 except (TypeError, json.JSONDecodeError) as e:
-                    critical_error_handler("Couldn\'t decode {} file, check it\'s validity".format(file), e)
+                    critical_error_handler(f"Couldn\'t decode {file} file, check it\'s validity", e)
         except FileNotFoundError as e:
-            critical_error_handler('File {} not found, check if it exists in {}'.format(file, PROJ_PATH), e, err.ENFILE)
+            critical_error_handler(f'File {file} not found, check if it exists in {PROJ_PATH}', e, err.ENFILE)
 
     class TokensConfig:
         def __init__(self, tokens):
@@ -67,15 +67,14 @@ class Configuration(metaclass=Singleton):
                         self.password = ":" + self.password
                     if self.port:
                         self.port = ":" + self.port
-                    return 'postgresql://{}{}@{}{}/{}'. \
-                        format(self.username, self.password, self.hostname, self.port, self.dbname)
+                    return f'postgresql://{self.username}{self.password}@{self.hostname}{self.port}/{self.dbname}'
                 except KeyError as e:
-                    critical_error_handler('Uncorrect credits, at {} engine'.format(self.engine), e)
+                    critical_error_handler(f'Uncorrect credits, at {self.engine} engine', e)
 
             elif self.engine == 'sqlite':
                 try:
-                    return 'sqlite:///{}.sqlite'.format(self.dbname)
+                    return f'sqlite:///{self.dbname}.sqlite'
                 except KeyError as e:
-                    critical_error_handler('Uncorrect credits, at {} engine'.format(self.engine), e)
+                    critical_error_handler(f'Uncorrect credits, at {self.engine} engine', e)
             else:
-                critical_error_handler('{} engine not yet implemented'.format(self.engine))
+                critical_error_handler(f'{self.engine} engine not yet implemented')
