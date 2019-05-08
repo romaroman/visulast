@@ -134,3 +134,10 @@ def reset(bot, update):
 
 def error(bot, update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
+
+
+def remove_keyboard(update):
+    user = update.message.from_user
+    logger.info("Gender of %s: %s", user.first_name, update.message.text)
+    update.message.reply_text('Keyboard is removed',
+                              reply_markup=ReplyKeyboardRemove())

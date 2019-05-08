@@ -42,6 +42,8 @@ class Configuration(metaclass=Singleton):
             self.last_fm = tokens['last.fm']
             self.aws_service = tokens['aws.service']
             self.docker_hub = tokens['docker.hub']
+            self.liqpay_private_test =  tokens['liqbpay.private.test']
+            self.liqpay_public_test = tokens['liqpay.public.test']
 
     class DatabaseConfig:
         def __init__(self, dbconfig):
