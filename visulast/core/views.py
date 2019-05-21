@@ -1,5 +1,6 @@
 import numpy as np
 from datetime import datetime
+import os
 
 import shapefile as shp
 import matplotlib.pyplot as plt
@@ -11,6 +12,7 @@ from visulast.core import models
 from visulast.utils.helpers import get_logger, PROJ_PATH, SHAPE_FILE
 
 logger = get_logger(__name__)
+images_directory = f"{PROJ_PATH}out/graphs/worldmaps/"
 
 
 def get_colour_scale(data):
@@ -66,9 +68,12 @@ class UserView(_View):
                     facecolor=rgb2hex(color), edgecolor='k', linewidth=0.5
                 ))
 
-        filename = f"{PROJ_PATH}/out/graphs/worldmaps/{self.name}_{str(datetime.now()).replace(' ', '_')[:-7]}.png"
-        # plt.show()
+        filename = f"{images_directory}{self.name}_{str(datetime.now()).replace(' ', '_')[:-7]}.png"
+
+        if not os.path.exists(images_directory):
+            os.makedirs(images_directory)
         plt.savefig(filename, dpi=200)
+
         return filename
 
     def __init__(self, name='noname'):

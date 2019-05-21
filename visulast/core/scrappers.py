@@ -39,7 +39,7 @@ class CountryOfArtistScrapper:
 
     @staticmethod
     def normalize_with_gmaps(query):
-        predictions = gmaps_client.places_autocomplete(input_text=query, session_token=session)
+        predictions = gmaps_client.places_autocomplete(input_text=query)
         for p in predictions:
             if 'locality' in p["types"] and 'political' in p["types"]:
                 if p["terms"][0]["value"] in legal_countries:
@@ -106,9 +106,7 @@ class CountryOfArtistScrapper:
                 except IndexError:
                     return None
             try:
-                res_country = CountryOfArtistScrapper.normalize_with_dictionary(
-                    origin.text.split(',')[-1][1:]
-                )
+                res_country = CountryOfArtistScrapper.normalize_with_dictionary(origin.text.split(',')[-1][1:])
             except AttributeError:
                 return summary_parser(page.summary)
             if res_country in legal_countries:
@@ -191,4 +189,5 @@ class CountryOfArtistScrapper:
 
 
 if __name__ == '__main__':
+
     print(CountryOfArtistScrapper.get_one_by_string('Bowery Electric'))

@@ -40,15 +40,25 @@ def send_action(action):
 
 
 # <editor-fold desc="Globals">
-def start(bot, update):
-    return NO_JOBS
+def done(bot, update, user_data):
+    if user_data:
+        del user_data
+    update.message.reply_text("Bye, bro!")
+    user_data.clear()
+    return ConversationHandler.END
 
-def abort(bot, update):
-    raise NotImplemented
+
+def remove_keyboard(bot, update):
+    user = update.message.from_user
+    logger.info(f'Keyboard is removed from chat {update.message.chat_id}')
+    update.message.reply_text('Keyboard is removed',
+                              reply_markup=ReplyKeyboardRemove())
 
 
-def guide(bot, update):
-    raise NotImplemented
+def force_finish(bot, update):
+    logger.info(f'Conversation {update.message.chat_id} is set to {ConversationHandler.END}')
+    update.message.reply_text(f'Set to {ConversationHandler.END}')
+    return ConversationHandler.END
 
 
 def faq(bot, update):
@@ -60,6 +70,10 @@ def examples(bot, update):
 
 
 # TODO: IMPLEMENT THIS
+def authorize():
+    raise NotImplemented
+
+
 def set_lastfm_username(bot, update, userdata):
     try:
         lastfm_client.get_user(update.message.text)
@@ -69,30 +83,15 @@ def set_lastfm_username(bot, update, userdata):
     except pylast.WSError:
         update.message.reply_text("Such user doesn't exist try again or use /abort command to cancel")
         return
-
-
-def done(bot, update, user_data):
-    if user_data:
-        del user_data
-    update.message.reply_text("Bye, bro!")
-    user_data.clear()
-    return ConversationHandler.END
 # </editor-fold>
 
 
 # <editor-fold desc="Selectors">
-def visu(bot, update):
+
+def visualize(bot, update, user_data):
     reply_markup = ReplyKeyboardMarkup(keyboards['subjects'], one_time_keyboard=True)
     bot.send_message(chat_id=update.message.chat_id,
                      text="Okay, choose what subject from last.fm to analyze", reply_markup=reply_markup)
-    return CHOOSING_SUBJECT
-
-
-def subject_choice(bot, update, user_data):
-    user_data['subject'] = update.message.text
-    reply_markup = ReplyKeyboardMarkup(keyboards['periods'], one_time_keyboard=True)
-    bot.send_message(chat_id=update.message.chat_id,
-                     text="Nice, over what time you need your stats? (larger date - longer waiting)", reply_markup=reply_markup)
     return CHOOSING_PERIOD
 
 
@@ -119,25 +118,10 @@ def graph_choice(bot, update, user_data):
     file = controller.scrobbles_world_map(2)
     bot.send_photo(chat_id=update.message.chat_id, caption='Your map bro)',
                    photo=open(file, 'rb'))
-    return NO_JOBS
+    return ConversationHandler.END
 
 # </editor-fold>
-
-
-def set0(bot, update):
-    return 0
-
-
-def reset(bot, update):
-    return NO_JOBS
-
 
 def error(bot, update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
 
-
-def remove_keyboard(update):
-    user = update.message.from_user
-    logger.info("Gender of %s: %s", user.first_name, update.message.text)
-    update.message.reply_text('Keyboard is removed',
-                              reply_markup=ReplyKeyboardRemove())

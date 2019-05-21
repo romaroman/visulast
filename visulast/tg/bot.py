@@ -18,26 +18,30 @@ def main():
 
     hs = [
         ConversationHandler(
-            entry_points=[CommandHandler('start', handlers.start)],
+            entry_points=[
+                CommandHandler('visualize', handlers.visualize, pass_user_data=True),
+                RegexHandler(f"^({keyboard_to_regex(handlers.keyboards['subjects'])})$",
+                                                handlers.visualize, pass_user_data=True)
+            ],
             states={
-                None: [CommandHandler('visu', handlers.visu)],
-                CHOOSING_SUBJECT: [RegexHandler(f"^({keyboard_to_regex(handlers.keyboards['subjects'])})$",
-                                                handlers.subject_choice, pass_user_data=True)],
-                CHOOSING_PERIOD: [RegexHandler(f"^({keyboard_to_regex(handlers.keyboards['periods'])})$",
-                                               handlers.period_choice, pass_user_data=True),
-                                  RegexHandler('^Custom$', handlers.custom_period_choice, pass_user_data=True)
-                                  ],
-                CHOOSING_GRAPH: [RegexHandler(f"^({keyboard_to_regex(handlers.keyboards['graphs'])})$",
-                                              handlers.graph_choice, pass_user_data=True)],
+                CHOOSING_PERIOD: [
+                    RegexHandler(f"^({keyboard_to_regex(handlers.keyboards['periods'])})$",
+                                 handlers.period_choice, pass_user_data=True),
+                    RegexHandler('^Custom$', handlers.custom_period_choice, pass_user_data=True),
+                ],
+                CHOOSING_GRAPH: [
+                    RegexHandler(f"^({keyboard_to_regex(handlers.keyboards['graphs'])})$",
+                                 handlers.graph_choice, pass_user_data=True),
+                ],
             },
-            fallbacks=[RegexHandler('^Done$', handlers.done, pass_user_data=True),
-                       CommandHandler('reset', handlers.reset),
-                       CommandHandler('set0', handlers.set0)]
+            fallbacks=[
+                CommandHandler('done', handlers.done, pass_user_data=True),
+                CommandHandler('remove_keyboard', handlers.remove_keyboard, pass_user_data=True),
+                CommandHandler('force_finish', handlers.force_finish, pass_user_data=True),
+            ]
         ),
-        CommandHandler('guide', handlers.guide),
         CommandHandler('faq', handlers.faq),
         CommandHandler('examples', handlers.examples, pass_args=True),
-        CommandHandler('abort', handlers.abort),
         CommandHandler('remove_keyboard', handlers.remove_keyboard)
     ]
 
