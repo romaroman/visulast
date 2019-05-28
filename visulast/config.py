@@ -9,7 +9,7 @@ DB_ENGINES = ['postgresql', 'sqlite']
 
 
 def critical_error_handler(msg, e=None, code=-1):
-    logger.critical(f'Cricitical error at {str(__name__ )}\n{msg}\n\n{e}')
+    logger.critical(f'Critical error at {str(__name__ )}\n{msg}\n\n{e}')
     sys.exit(code)
 
 
@@ -65,11 +65,7 @@ class Configuration(metaclass=Singleton):
 
             elif self.engine == 'postgresql':
                 try:
-                    if self.password:
-                        self.password = ":" + self.password
-                    if self.port:
-                        self.port = ":" + self.port
-                    return f'postgresql://{self.username}{self.password}@{self.hostname}{self.port}/{self.dbname}'
+                    return f'postgresql://{self.username}:{self.password}@{self.hostname}:{self.port}/{self.dbname}'
                 except KeyError as e:
                     critical_error_handler(f'Uncorrect credits, at {self.engine} engine', e)
 

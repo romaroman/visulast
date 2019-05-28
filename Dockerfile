@@ -1,6 +1,20 @@
-FROM alpine:3.5
-RUN apk add --update py2-pip
+FROM python:3.6
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /usr/src/app
+
 COPY requirements.txt /usr/src/app/
-RUN pip install -r /usr/src/app/requirements.txt
-COPY src /usr/src/app/
-EXPOSE 4884
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . /usr/src/app
+
+# For Django
+EXPOSE 8000
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+# For some other command
+CMD ["python", "manage.py"]

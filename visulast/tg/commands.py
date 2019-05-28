@@ -1,7 +1,7 @@
 from functools import wraps
 import pylast
 import telegram
-from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup
+from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler
 from visulast.utils.helpers import get_logger
 from visulast.core import controllers
@@ -49,19 +49,19 @@ def done(bot, update, user_data):
 
 
 def remove_keyboard(bot, update):
-    user = update.message.from_user
     logger.info(f'Keyboard is removed from chat {update.message.chat_id}')
     update.message.reply_text('Keyboard is removed',
                               reply_markup=ReplyKeyboardRemove())
 
 
-def force_finish(bot, update):
+def set_start(bot, update):
     logger.info(f'Conversation {update.message.chat_id} is set to {ConversationHandler.END}')
     update.message.reply_text(f'Set to {ConversationHandler.END}')
     return ConversationHandler.END
 
 
 def faq(bot, update):
+    update.message.reply_text('FAQ')
     raise NotImplemented
 
 
@@ -87,18 +87,33 @@ def set_lastfm_username(bot, update, userdata):
 
 
 # <editor-fold desc="Selectors">
+def FUNCTION(bot, update):
+    update.message.reply_text('YES THAT"S I AM SHIT MOTHERFUCKER')
+
+
+def inline_example(bot, update):
+    keyboard = [[InlineKeyboardButton("Option 1", callback_data='1'),
+                 InlineKeyboardButton("Option 2", callback_data='2')],
+
+                [InlineKeyboardButton("Option 3", callback_data='3')]]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    update.message.reply_text('Please choose:', reply_markup=reply_markup)
+
 
 def visualize(bot, update, user_data):
     reply_markup = ReplyKeyboardMarkup(keyboards['subjects'], one_time_keyboard=True)
     bot.send_message(chat_id=update.message.chat_id,
                      text="Okay, choose what subject from last.fm to analyze", reply_markup=reply_markup)
-    return CHOOSING_PERIOD
+    return CHOOSING_SUBJECT
 
 
 def period_choice(bot, update, user_data):
     user_data['period'] = update.message.text
     update.message.reply_text("Okay, cool, there's left only to choose graph type")
     reply_markup = ReplyKeyboardMarkup(keyboards['graphs'], one_time_keyboard=True)
+
     bot.send_message(chat_id=update.message.chat_id, text="Okay, choose what to analyze", reply_markup=reply_markup)
     return CHOOSING_GRAPH
 
@@ -122,6 +137,6 @@ def graph_choice(bot, update, user_data):
 
 # </editor-fold>
 
+
 def error(bot, update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
-
