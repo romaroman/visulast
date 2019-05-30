@@ -1,4 +1,5 @@
-from telegram.ext import Updater, ConversationHandler, CommandHandler, RegexHandler, Filters, MessageHandler, PicklePersistence
+from telegram.ext import Updater, ConversationHandler, CommandHandler, RegexHandler, Filters, MessageHandler,\
+    PicklePersistence
 
 from visulast.tg import commands
 from visulast.config import Configuration
@@ -13,9 +14,9 @@ CHOOSING_HOW = 3
 
 
 def main():
-    updater = Updater(token=Configuration().tokens.telegram_bot)
-    dispatcher = updater.dispatcher
     pp = PicklePersistence(filename='bot')
+    updater = Updater(token=Configuration().tokens.telegram_bot, persistence=pp, use_context=True)
+    dispatcher = updater.dispatcher
 
     hs = [
         ConversationHandler(
@@ -24,22 +25,22 @@ def main():
             ],
             states={
                 CHOOSING_SUBJECT: [
-                    RegexHandler(f"^({keyboard_to_regex(commands.keyboards['subjects'])})$",
+                    MessageHandler(Filters.regex(f"^({keyboard_to_regex(commands.keyboards['subjects'])})$"),
                              commands.visualize, pass_user_data=True)
                 ],
-                CHOOSING_PERIOD: [
-                    RegexHandler(f"^({keyboard_to_regex(commands.keyboards['periods'])})$",
-                                 commands.period_choice, pass_user_data=True),
-                    RegexHandler('^Custom$', commands.custom_period_choice, pass_user_data=True),
-                ],
-                CHOOSING_GRAPH: [
-                    RegexHandler(f"^({keyboard_to_regex(commands.keyboards['graphs'])})$",
-                                 commands.graph_choice, pass_user_data=True),
-                ],
-                CHOOSING_HOW: [
-                    RegexHandler(f"^({keyboard_to_regex(commands.keyboards['how'])})$",
-                                 commands.how_choice, pass_user_data=True),
-                ],
+                # CHOOSING_PERIOD: [
+                #     RegexHandler(f"^({keyboard_to_regex(commands.keyboards['periods'])})$",
+                #                  commands.period_choice, pass_user_data=True),
+                #     RegexHandler('^Custom$', commands.custom_period_choice, pass_user_data=True),
+                # ],
+                # CHOOSING_GRAPH: [
+                #     RegexHandler(f"^({keyboard_to_regex(commands.keyboards['graphs'])})$",
+                #                  commands.graph_choice, pass_user_data=True),
+                # ],
+                # CHOOSING_HOW: [
+                #     RegexHandler(f"^({keyboard_to_regex(commands.keyboards['how'])})$",
+                #                  commands.how_choice, pass_user_data=True),
+                # ],
             },
             fallbacks=[
                 CommandHandler('abort', commands.abort, pass_user_data=True),
