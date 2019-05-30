@@ -1,0 +1,14 @@
+visualize - Start conversation with bot
+
+abort - Cancel current operation
+cancel - Set conversation state to beginning
+
+help - List all commands with theirs descriptions
+faq - Find out how to use this bot
+
+clean - Wipe out ALL data associated with your Telegram ID
+authenticate - Set your last.fm username without authorization
+authorize - Authenticate with last.fm website
+
+report - Send a bug report with maintainer
+donate - Share some money with developer

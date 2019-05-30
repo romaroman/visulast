@@ -1,38 +1,32 @@
-start_it:
-	python src/main.py
+start:
+	python visulast/run.py
 
-clean_output:
+act:
+	source activate visulast
+
+clean_out:
 	rm -r out/* &&
 
 clean_logs:
 	rm -r logs/* &&
 
-clean_projcache:
+clean_prjcache:
 	rm -r cache/* &&
 
 clean_pycache:
 	find . -name "*.pyc" -exec rm -f {} \
 
-start_sample:
-	python src/main.py -u username -l 20
-
-install_requirements:
+install_reqs:
 	conda install --file requirements.txt
 
-export_requirements:
+export_reqs:
 	conda list --export > requirements.txt
 
-create_environment:
+create_env:
 	conda env create -f environment.yaml
 
-export_environment:
+export_env:
 	conda env export > environment.yaml
 
-start_bot:
-	python src/bot.py
-
-build_image:
-	docker build -t visualast .
-
-pr_py:
-	~/.conda/envs/lastfm/bin/python
+build_container:
+	docker build -t visulast .

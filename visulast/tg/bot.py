@@ -9,7 +9,7 @@ logger = get_logger(__name__)
 CHOOSING_SUBJECT = 0
 CHOOSING_PERIOD = 1
 CHOOSING_GRAPH = 2
-NO_JOBS = 3
+CHOOSING_HOW = 3
 
 
 def main():
@@ -23,8 +23,10 @@ def main():
                 CommandHandler('visualize', commands.visualize, pass_user_data=True),
             ],
             states={
-                CHOOSING_SUBJECT: RegexHandler(f"^({keyboard_to_regex(commands.keyboards['subjects'])})$",
-                             commands.visualize, pass_user_data=True),
+                CHOOSING_SUBJECT: [
+                    RegexHandler(f"^({keyboard_to_regex(commands.keyboards['subjects'])})$",
+                             commands.visualize, pass_user_data=True)
+                ],
                 CHOOSING_PERIOD: [
                     RegexHandler(f"^({keyboard_to_regex(commands.keyboards['periods'])})$",
                                  commands.period_choice, pass_user_data=True),
@@ -34,8 +36,14 @@ def main():
                     RegexHandler(f"^({keyboard_to_regex(commands.keyboards['graphs'])})$",
                                  commands.graph_choice, pass_user_data=True),
                 ],
+                CHOOSING_HOW: [
+                    RegexHandler(f"^({keyboard_to_regex(commands.keyboards['how'])})$",
+                                 commands.how_choice, pass_user_data=True),
+                ],
             },
             fallbacks=[
+                CommandHandler('abort', commands.abort, pass_user_data=True),
+
             ],
             name="Regular conversation",
             persistent=True

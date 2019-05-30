@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 CHOOSING_SUBJECT = 0
 CHOOSING_PERIOD = 1
 CHOOSING_GRAPH = 2
-NO_JOBS = 3
+CHOOSING_HOW = 3
 
 keyboards = {
     'subjects': [['Myself', 'User', 'Followers'],
@@ -23,7 +23,8 @@ keyboards = {
                 ['5 years', 'Overall', 'Custom']],
     'graphs': [['Histogram', 'Worldmap', 'Flow'],
                ['Pie', 'Bar', 'Line'],
-               ['Swarm', 'Hear', 'Cluster']]
+               ['Swarm', 'Hear', 'Cluster']],
+    'how': [['Photo', 'File', 'Share Link', 'Telegram Link']]
 }
 
 
@@ -40,34 +41,20 @@ def send_action(action):
 
 
 # <editor-fold desc="Globals">
-def done(bot, update, user_data):
+def abort(bot, update, user_data):
+    update.message.reply_text("Current operation is aborted, conversation state is set to beginning")
+    return ConversationHandler.END
+
+
+def clean(bot, update, user_data):
     if user_data:
         del user_data
-    update.message.reply_text("Bye, bro!")
     user_data.clear()
-    return ConversationHandler.END
-
-
-def remove_keyboard(bot, update):
-    logger.info(f'Keyboard is removed from chat {update.message.chat_id}')
-    update.message.reply_text('Keyboard is removed',
-                              reply_markup=ReplyKeyboardRemove())
-
-
-def set_start(bot, update):
-    logger.info(f'Conversation {update.message.chat_id} is set to {ConversationHandler.END}')
-    update.message.reply_text(f'Set to {ConversationHandler.END}')
-    return ConversationHandler.END
+    update.message.reply_text("Your data is wiped")
 
 
 def faq(bot, update):
-    update.message.reply_text('FAQ')
     raise NotImplemented
-
-
-def examples(bot, update):
-    raise NotImplemented
-
 
 # TODO: IMPLEMENT THIS
 def authorize():
@@ -126,7 +113,6 @@ def custom_period_choice(bot, update, user_data):
     return CHOOSING_GRAPH
 
 
-@send_action(telegram.ChatAction.UPLOAD_PHOTO)
 def graph_choice(bot, update, user_data):
     user_data['graph'] = update.message.text
     controller = controllers.UserController('niedego', update.message.chat_id)
@@ -134,6 +120,13 @@ def graph_choice(bot, update, user_data):
     bot.send_photo(chat_id=update.message.chat_id, caption='Your map bro)',
                    photo=open(file, 'rb'))
     return ConversationHandler.END
+
+
+@send_action(telegram.ChatAction.UPLOAD_PHOTO)
+def how_choice(bot, update, user_data):
+
+    return CHOOSING_HOW
+
 
 # </editor-fold>
 
