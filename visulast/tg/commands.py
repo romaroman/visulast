@@ -40,7 +40,7 @@ def send_action(action):
     return decorator
 
 
-# <editor-fold desc="Globals">
+# <editor-fold desc="Essentials">
 def abort(bot, update, user_data):
     update.message.reply_text("Current operation is aborted, conversation state is set to beginning")
     return ConversationHandler.END
@@ -56,12 +56,12 @@ def clean(bot, update, user_data):
 def faq(bot, update):
     raise NotImplemented
 
-# TODO: IMPLEMENT THIS
+
 def authorize():
     raise NotImplemented
 
 
-def set_lastfm_username(bot, update, userdata):
+def authenticate(bot, update, userdata):
     try:
         lastfm_client.get_user(update.message.text)
         userdata['lastfm_username'] = update.message.text
@@ -73,22 +73,7 @@ def set_lastfm_username(bot, update, userdata):
 # </editor-fold>
 
 
-# <editor-fold desc="Selectors">
-def FUNCTION(bot, update):
-    update.message.reply_text('YES THAT"S I AM SHIT MOTHERFUCKER')
-
-
-def inline_example(bot, update):
-    keyboard = [[InlineKeyboardButton("Option 1", callback_data='1'),
-                 InlineKeyboardButton("Option 2", callback_data='2')],
-
-                [InlineKeyboardButton("Option 3", callback_data='3')]]
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    update.message.reply_text('Please choose:', reply_markup=reply_markup)
-
-
+# <editor-fold desc="Main conversation">
 def visualize(bot, update, user_data):
     reply_markup = ReplyKeyboardMarkup(keyboards['subjects'], one_time_keyboard=True)
     bot.send_message(chat_id=update.message.chat_id,
@@ -119,17 +104,21 @@ def graph_choice(bot, update, user_data):
     file = controller.scrobbles_world_map(2)
     bot.send_photo(chat_id=update.message.chat_id, caption='Your map bro)',
                    photo=open(file, 'rb'))
-    return ConversationHandler.END
+    return CHOOSING_HOW
+
+
+def wrong_response(bot, update, user_data):
+    raise NotImplemented
 
 
 @send_action(telegram.ChatAction.UPLOAD_PHOTO)
 def how_choice(bot, update, user_data):
 
-    return CHOOSING_HOW
+    return ConversationHandler.END
 
 
 # </editor-fold>
 
 
-def error(bot, update, error):
-    logger.warning('Update "%s" caused error "%s"', update, error)
+def error_callback(update, context):
+    logger.warning('Update "%s" caused error "%s"', update, context.error)

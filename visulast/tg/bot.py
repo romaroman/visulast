@@ -1,4 +1,4 @@
-from telegram.ext import Updater, ConversationHandler, CommandHandler, RegexHandler, Filters, MessageHandler,\
+from telegram.ext import Updater, ConversationHandler, CommandHandler, RegexHandler, Filters, MessageHandler, \
     PicklePersistence
 
 from visulast.tg import commands
@@ -26,35 +26,42 @@ def main():
             states={
                 CHOOSING_SUBJECT: [
                     MessageHandler(Filters.regex(f"^({keyboard_to_regex(commands.keyboards['subjects'])})$"),
-                             commands.visualize, pass_user_data=True)
+                                   commands.visualize, pass_user_data=True)
                 ],
-                # CHOOSING_PERIOD: [
-                #     RegexHandler(f"^({keyboard_to_regex(commands.keyboards['periods'])})$",
-                #                  commands.period_choice, pass_user_data=True),
-                #     RegexHandler('^Custom$', commands.custom_period_choice, pass_user_data=True),
-                # ],
-                # CHOOSING_GRAPH: [
-                #     RegexHandler(f"^({keyboard_to_regex(commands.keyboards['graphs'])})$",
-                #                  commands.graph_choice, pass_user_data=True),
-                # ],
-                # CHOOSING_HOW: [
-                #     RegexHandler(f"^({keyboard_to_regex(commands.keyboards['how'])})$",
-                #                  commands.how_choice, pass_user_data=True),
-                # ],
+                CHOOSING_PERIOD: [
+                    MessageHandler(Filters.regex(f"^({keyboard_to_regex(commands.keyboards['periods'])})$"),
+                                   commands.period_choice, pass_user_data=True),
+                    MessageHandler(Filters.regex('^Custom$'), commands.custom_period_choice, pass_user_data=True),
+                ],
+                CHOOSING_GRAPH: [
+                    MessageHandler(Filters.regex(f"^({keyboard_to_regex(commands.keyboards['graphs'])})$"),
+                                   commands.graph_choice, pass_user_data=True),
+
+                ],
+                CHOOSING_HOW: [
+                    MessageHandler(Filters.regex(f"^({keyboard_to_regex(commands.keyboards['how'])})$"),
+                                   commands.how_choice, pass_user_data=True),
+                ],
             },
             fallbacks=[
                 CommandHandler('abort', commands.abort, pass_user_data=True),
-
             ],
             name="Regular conversation",
             persistent=True
 
         ),
+        CommandHandler('abort', commands.abort, pass_user_data=True),
+        CommandHandler('abort', commands.abort, pass_user_data=True),
+        CommandHandler('abort', commands.abort, pass_user_data=True),
+        CommandHandler('abort', commands.abort, pass_user_data=True),
+        CommandHandler('abort', commands.abort, pass_user_data=True),
+        CommandHandler('abort', commands.abort, pass_user_data=True),
+        CommandHandler('abort', commands.abort, pass_user_data=True),
     ]
 
     for handler in hs:
         dispatcher.add_handler(handler)
-    dispatcher.add_error_handler(commands.error)
+    dispatcher.add_error_handler(commands.error_callback)
 
     updater.start_polling()
     updater.idle()
