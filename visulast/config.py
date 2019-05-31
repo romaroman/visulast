@@ -1,7 +1,7 @@
 import json
 import errno as err
 import sys
-
+import pylast
 from visulast.utils.helpers import get_logger, PROJ_PATH, Singleton
 
 logger = get_logger(__name__)
@@ -24,6 +24,7 @@ class Configuration(metaclass=Singleton):
             self.app_version = self.config['appVersion']
 
             self.developerTelegramID = self.config['developerTelegramID']
+            self.lastfm_network = pylast.LastFMNetwork(api_key=self.tokens.last_fm)
         except (KeyError, TypeError) as e:
             critical_error_handler('Something went wrong', e)
 

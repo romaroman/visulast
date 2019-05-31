@@ -1,5 +1,7 @@
 from visulast.core import scrappers
 from visulast.utils.helpers import get_logger
+from visulast.config import Configuration
+
 
 logger = get_logger(__name__)
 
@@ -13,11 +15,11 @@ class _Model:
 
 
 class UserModel(_Model):
-    def __init__(self, name, chat_id):
+    def __init__(self, name, telegram_id):
         super(UserModel, self).__init__()
         self.username = name
-        self.telegram_id = chat_id
-        self.lastfm_user = scrappers.lastfm_client.get_user(self.username)
+        self.telegram_id = telegram_id
+        self.lastfm_user = Configuration().lastfm_network.get_user(self.username)
         self.library = self.lastfm_user.get_library()
 
     def get_for_all_countries(self, what='s', limit=5):
@@ -42,7 +44,11 @@ class UserModel(_Model):
     def get_scrobbles_per_country(self):
         return
 
-    pass
+    def get_classic_eight_albums(self, period):
+        return self.lastfm_user.get_top_albums(period, 8)
+
+    def get_classic_eight_artists(self, period):
+        return self.lastfm_user.get_top_artists(period, 8)
 
 
 class AristModel(_Model):

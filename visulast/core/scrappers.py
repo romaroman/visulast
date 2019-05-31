@@ -1,20 +1,23 @@
 import uuid
 import re
+from io import BytesIO, StringIO
+
 import requests
+from PIL import Image
 from bs4 import BeautifulSoup
 from collections import defaultdict
 
+from urllib.request import urlopen
 import pylast
 import wikipedia as wiki
 import googlemaps as gmaps
 import musicbrainzngs as mbz
-
+import numpy as np
 from visulast.config import Configuration
 from visulast.utils.helpers import get_logger, extract_countries
 
 legal_countries = extract_countries()
 logger = get_logger(__name__)
-lastfm_client = pylast.LastFMNetwork(api_key=Configuration().tokens.last_fm)
 gmaps_client = gmaps.Client(key=Configuration().tokens.google_maps_api)
 mbz.set_useragent(app=Configuration().app_name, version=Configuration().app_version)
 session = uuid.uuid4()
@@ -182,10 +185,27 @@ class CountryOfArtistScrapper:
 
     @staticmethod
     def get_one_by_string(artist_name):
-        lastfm_artist = lastfm_client.get_artist(artist_name=artist_name)
+        lastfm_artist = Configuration().lastfm_network.get_artist(artist_name=artist_name)
         return CountryOfArtistScrapper.get_one(lastfm_artist)
 
 
-if __name__ == '__main__':
+class ImageScrapper(object):
+    def __init__(self):
+        super(ImageScrapper, self).__init__()
 
-    print(CountryOfArtistScrapper.get_one_by_string('Bowery Electric'))
+    @staticmethod
+    def getAristImage(artist_name):
+        req = requests.get(f"https://www.last.fm/music/{artist_name.replace(' ', '+')}")
+        soup = BeautifulSoup(req.text, features="lxml")
+        img_url = soup.findAll("img", {"class": "avatar"})[0].attrs['src']
+        if img_url == '':
+            logger.warning(f"Avatar wasn't found for {artist_name}")
+        else:
+            response = requests.get(img_url)
+            image = np.array(Image.open(BytesIO(response.content)))
+            # image = np.asarray(bytearray(resp.read()), dtype="uint8")
+            return image
+
+
+if __name__ == '__main__':
+    ImageScrapper.getAristImage('Cher')

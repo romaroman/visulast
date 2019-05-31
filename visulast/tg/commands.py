@@ -58,7 +58,7 @@ def clean(update, context):
     update.message.reply_text("Your data is wiped")
 
 
-def faq(update, context):
+def get_faq(update, context):
     update.message.reply_text("FAQ IS FUCK YOU")
 
 
@@ -72,7 +72,7 @@ def check_username(update, context):
         update.message.reply_text(f"Your last.fm username is [{username}](https://www.last.fm/user/{username})",
                                   parse_mode=telegram.ParseMode.MARKDOWN)
     else:
-        update.message.reply_text('You haven\'t set last.fm username already. Type /authenticate _username_ to set',
+        update.message.reply_text('You haven\'t set last.fm username already. To set just type /authenticate _username_ ',
                                   parse_mode=telegram.ParseMode.MARKDOWN)
 
 
@@ -82,13 +82,14 @@ def authenticate(update, context):
         lastfm_client.get_user(username).get_library().get_artists(1)
         context.user_data['lastfm_username'] = username
         update.message.reply_text(f"You've set your last.fm username to [{username}](https://www.last.fm/user/{username})",
-                                  parse_mode=telegram.ParseMode.MARKDOWN)
+                                  parse_mode=telegram.ParseMode.MARKDOWN, reply_to_message_id=update.message.message_id)
         return
     except pylast.WSError:
         update.message.reply_text("Such user doesn't exist, please try again")
 
 
-def help(update, context):
+def get_help(update, context):
+    print(context.chat_data)
     raise NotImplemented
 
 

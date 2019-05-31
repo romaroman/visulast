@@ -1,7 +1,10 @@
-from telegram.ext import Updater, ConversationHandler, CommandHandler, Filters, MessageHandler, PicklePersistence
+from telegram.ext import Updater, ConversationHandler, CommandHandler, Filters, MessageHandler, PicklePersistence, \
+    CallbackQueryHandler
 from visulast.tg import commands
 from visulast.config import Configuration
 from visulast.utils.helpers import keyboard_to_regex, get_logger
+import visulast.tg.calendar as calendar
+
 
 logger = get_logger(__name__)
 
@@ -47,8 +50,8 @@ def attach_handlers(dispatcher):
             persistent=True,
             name='visualize conversation'
         ),
-        CommandHandler('help', commands.help, pass_user_data=True),
-        CommandHandler('faq', commands.faq, pass_user_data=True),
+        CommandHandler('help', commands.get_help, pass_user_data=True),
+        CommandHandler('faq', commands.get_faq, pass_user_data=True),
         CommandHandler('clean', commands.clean, pass_user_data=True),
         CommandHandler('authenticate', commands.authenticate, pass_user_data=True, pass_args=True),
         CommandHandler('authorize', commands.authorize, pass_user_data=True),
@@ -69,6 +72,8 @@ def main():
     attach_handlers(dispatcher)
     dispatcher.add_error_handler(commands.error_callback)
 
+    updater.dispatcher.add_handler(CommandHandler("calendar", calendar.calendar_handler))
+    updater.dispatcher.add_handler(CallbackQueryHandler(calendar.inline_handler))
     updater.start_polling()
     updater.idle()
 
