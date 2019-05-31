@@ -14,12 +14,15 @@ DONE! support multithreading
 
 SATURDAY:
     HIGH PRIORITY:
+        revise MVC architecture!!!
+
         implement how choice with usage of inline markup
         also add inline options to generated image
         create some visualizations with seaborn or matplotlib or smthing else in notebook
         implement another 5 visualizations (classic eight style, piecharts, barcharts, smthin else)
         add additional handler for chat_data intialization (ConversationHandler with /start)
         add parse support to controller for generation
+        migrate last.fm vars for controllers
 
     MEDIUM PRIORITY:
         store some info in sql database
@@ -38,8 +41,10 @@ TILL PROTECTION:
         implement donation functionality
         inline functionality
         extend messages with markup and emojis
+        organize imports
 
     INTEGRATION:
+        write setup.py file to generate code as package
         command line usage with numerous parameters
         write dockerfile without BASEMAP (based on miniconda)
 

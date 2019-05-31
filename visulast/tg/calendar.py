@@ -1,25 +1,18 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
-import datetime
+# TODO: split to appropriate files
 import calendar
+import datetime
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 
 
 def create_callback_data(action, year, month, day):
-    """ Create the callback data associated to each button"""
     return ";".join([action, str(year), str(month), str(day)])
 
 
 def separate_callback_data(data):
-    """ Separate the callback data"""
     return data.split(";")
 
 
 def create_calendar(year=None, month=None):
-    """
-    Create an inline keyboard with the provided year and month
-    :param int year: Year to use in the calendar, if None the current year is used.
-    :param int month: Month to use in the calendar, if None the current month is used.
-    :return: Returns the InlineKeyboardMarkup object with the calendar.
-    """
     now = datetime.datetime.now()
     if year is None:
         year = now.year
@@ -60,14 +53,6 @@ def create_calendar(year=None, month=None):
 
 
 def process_calendar_selection(update, context):
-    """
-    Process the callback_query. This method generates a new calendar if forward or
-    backward is pressed. This method should be called inside a CallbackQueryHandler.
-    :param telegram.Bot bot: The bot, as provided by the CallbackQueryHandler
-    :param telegram.Update update: The update, as provided by the CallbackQueryHandler
-    :return: Returns a tuple (Boolean,datetime.datetime), indicating if a date is selected
-                and returning the date if so.
-    """
     ret_data = (False, None)
     query = update.callback_query
     (action, year, month, day) = separate_callback_data(query.data)

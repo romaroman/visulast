@@ -56,3 +56,10 @@ def extract_countries():
     for record in shp.Reader(SHAPE_FILE, 'countries').iterRecords():
         countries.append(record['SOVEREIGNT'])
     return countries
+
+
+def is_lastfm_user_real(username):
+    if config.Configuration().lastfm_network.get_user(username).get_library().get_artists(1):
+        return True
+    return False
+

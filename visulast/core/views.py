@@ -1,8 +1,6 @@
 import numpy as np
 from datetime import datetime
 import os
-from PIL import Image
-import requests
 
 import shapefile as shp
 import matplotlib.pyplot as plt
@@ -32,6 +30,8 @@ def get_colour_scale(data):
 
     return colors
 
+
+# TODO: implement saving image as numpy array without exceptions
 def save_image(path, image):
     directory = os.path.dirname(os.path.abspath(path))
     if not os.path.exists(directory):
@@ -41,7 +41,7 @@ def save_image(path, image):
             logger.warning('Path already exist, continuing...')
             pass
 
-    cv.imwrite(f'{path}.{ext}', image, [int(cv.IMWRITE_PNG_COMPRESSION), 0])
+    # cv.imwrite(f'{path}.{ext}', image, [int(cv.IMWRITE_PNG_COMPRESSION), 0])
 
 
 def get_timestamp():
@@ -93,7 +93,7 @@ class UserView(_View):
                     facecolor=rgb2hex(color), edgecolor='k', linewidth=0.5
                 ))
 
-        filename = f"{images_directory}/worldmaps/{self.username}_{get_timestamp()}"
+        filename = f"{images_directory}/worldmaps/{self.username}_{get_timestamp()}.png"
 
         if not os.path.exists(images_directory):
             os.makedirs(images_directory)
