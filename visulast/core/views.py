@@ -97,7 +97,7 @@ class UserView(_View):
 
         if not os.path.exists(images_directory):
             os.makedirs(images_directory)
-        plt.savefig(filename, dpi=200)
+        plt.savefig(filename, dpi=80)
 
         return filename
 
