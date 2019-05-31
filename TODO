@@ -1,0 +1,52 @@
+DONE! wrap previous version in classes
+DONE! google location api or smthing like that (google places api autocomplete function)
+DONE! put secrets in json (config.py contains singleton class)
+DONE! environment / requirements file (switched to virtualenv)
+DONE! apply logging in another way
+DONE! fix configuration usage
+DONE! replace basemap with something another (switched to raw matplotlib)
+DONE! create hierarchical command usage for bot
+DONE! organize calls with custom keyboard (make that a little more interactive)
+DONE! implement storing cookies for user (or not in bot but somehow)
+DONE! find out how to initialize project
+DONE! support async i/o
+DONE! support multithreading
+
+SATURDAY:
+    HIGH PRIORITY:
+        implement how choice with usage of inline markup
+        also add inline options to generated image
+        create some visualizations with seaborn or matplotlib or smthing else in notebook
+        implement another 5 visualizations (classic eight style, piecharts, barcharts, smthin else)
+        add additional handler for chat_data intialization (ConversationHandler with /start)
+        add parse support to controller for generation
+
+    MEDIUM PRIORITY:
+        store some info in sql database
+        write migration scripts
+        authorize with last.fm token
+        integrate calendar into custom period choice
+
+SUNDAY:
+    HIGH PRIORITY:
+        store pickle serialization for scrapped data
+        store serialized object path's in database
+
+TILL PROTECTION:
+    MISC:
+        support logging about valuable information
+        implement donation functionality
+        inline functionality
+        extend messages with markup and emojis
+
+    INTEGRATION:
+        command line usage with numerous parameters
+        write dockerfile without BASEMAP (based on miniconda)
+
+    COVERAGE:
+        cover code with commentaries
+        write deployment faq
+        write unit tests
+        write readme file
+        write documentation
+        write contribution file

@@ -26,7 +26,6 @@ class UserController(_Controller):
         return self.view.draw_classic_eight(self.model.get_classic_eight_albums(period))
 
 
-
 if __name__ == '__main__':
     controller = UserController('niedego', 12131)
     controller.scrobbles_world_map(2)
