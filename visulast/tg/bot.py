@@ -1,4 +1,4 @@
-from telegram.ext import Updater, ConversationHandler, CommandHandler, RegexHandler, Filters, MessageHandler
+from telegram.ext import Updater, ConversationHandler, CommandHandler, Filters, MessageHandler, PicklePersistence
 from visulast.tg import commands
 from visulast.config import Configuration
 from visulast.utils.helpers import keyboard_to_regex, get_logger
@@ -44,14 +44,17 @@ def attach_handlers(dispatcher):
                 CommandHandler('abort', commands.abort, pass_user_data=True),
             ],
             allow_reentry=True,
+            persistent=True,
+            name='visualize conversation'
         ),
         CommandHandler('help', commands.help, pass_user_data=True),
         CommandHandler('faq', commands.faq, pass_user_data=True),
         CommandHandler('clean', commands.clean, pass_user_data=True),
-        CommandHandler('authenticate', commands.authenticate, pass_user_data=True),
+        CommandHandler('authenticate', commands.authenticate, pass_user_data=True, pass_args=True),
         CommandHandler('authorize', commands.authorize, pass_user_data=True),
         CommandHandler('report', commands.report, pass_user_data=True),
         CommandHandler('donate', commands.donate, pass_user_data=True),
+        CommandHandler('check_username', commands.check_username, pass_user_data=True),
     ]
 
     for handler in handlers:
@@ -59,7 +62,8 @@ def attach_handlers(dispatcher):
 
 
 def main():
-    updater = Updater(token=Configuration().tokens.telegram_bot)
+    persistance = PicklePersistence(filename='visulast.tg.bot')
+    updater = Updater(token=Configuration().tokens.telegram_bot, use_context=True, persistence=persistance)
     dispatcher = updater.dispatcher
 
     attach_handlers(dispatcher)

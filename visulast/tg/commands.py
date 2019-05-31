@@ -32,140 +32,152 @@ def send_action(action):
     def decorator(func):
         @wraps(func)
         def command_func(*args, **kwargs):
-            bot, update = args
-            bot.send_chat_action(chat_id=update.effective_message.chat_id, action=action)
-            return func(bot, update, **kwargs)
+            update, context = args
+            context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=action)
+            return func(update, context, **kwargs)
 
         return command_func
     return decorator
 
 
 # <editor-fold desc="Essentials">
-def abort(bot, update, user_data):
-    if user_data:
-        del user_data
-    user_data.clear()
-    bot.send_message(chat_id=update.message.chat_id, text="Current conversation is aborted", reply_markup=remove_keyboard)
+def abort(update, context):
+    if context.user_data:
+        del context.user_data
+    context.user_data.clear()
+    context.bot.send_message(chat_id=update.message.chat_id,
+                             text="Current conversation is aborted",
+                             reply_markup=remove_keyboard)
     return ConversationHandler.END
 
 
-def clean(bot, update, user_data):
-    if user_data:
-        del user_data
-    user_data.clear()
+def clean(update, context):
+    if context.user_data:
+        del context.user_data
+    context.user_data.clear()
     update.message.reply_text("Your data is wiped")
 
 
-def faq(bot, update):
-    logger.info("Sent FAQ")
+def faq(update, context):
+    update.message.reply_text("FAQ IS FUCK YOU")
+
+
+def authorize(update, context):
     raise NotImplemented
 
 
-def authorize(bot, update, userdata):
-    raise NotImplemented
+def check_username(update, context):
+    if 'lastfm_username' in context.user_data:
+        username = context.user_data['lastfm_username']
+        update.message.reply_text(f"Your last.fm username is [{username}](https://www.last.fm/user/{username})",
+                                  parse_mode=telegram.ParseMode.MARKDOWN)
+    else:
+        update.message.reply_text('You haven\'t set last.fm username already. Type /authenticate _username_ to set',
+                                  parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-def authenticate(bot, update, userdata):
+def authenticate(update, context):
+    username = context.args[0]
     try:
-        lastfm_client.get_user(update.message.text)
-        userdata['lastfm_username'] = update.message.text
-        update.message.reply_text("You've set your last.fm username to " + userdata['lastfm_username'])
+        lastfm_client.get_user(username).get_library().get_artists(1)
+        context.user_data['lastfm_username'] = username
+        update.message.reply_text(f"You've set your last.fm username to [{username}](https://www.last.fm/user/{username})",
+                                  parse_mode=telegram.ParseMode.MARKDOWN)
         return
     except pylast.WSError:
-        update.message.reply_text("Such user doesn't exist try again or use /abort command to cancel")
-        return
+        update.message.reply_text("Such user doesn't exist, please try again")
 
 
-def help(bot, update, userdata):
+def help(update, context):
     raise NotImplemented
 
 
-def cancel(bot, update, userdata):
+def cancel(update, context):
     return ConversationHandler.END
 
 
-def report(bot, update):
+def report(update, context):
     update.message.reply_text("Your report message was delivered to maintainer")
-    bot.send_message(chat_id=Configuration().developerTelegramID, text=update.message.text)
+    context.bot.send_message(chat_id=Configuration().developerTelegramID, text=update.message.text)
 
 
-def donate(bot, update, userdata):
+def donate(update, context):
     raise NotImplemented
 # </editor-fold>
 
 
 # <editor-fold desc="Main conversation">
-def visualize(bot, update, user_data):
+def visualize(update, context):
     reply_markup = ReplyKeyboardMarkup(keyboards['subject_types'], one_time_keyboard=True)
-    bot.send_message(chat_id=update.message.chat_id,
+    context.bot.send_message(chat_id=update.message.chat_id,
                      text="Okay, choose what kind of subject to analyze", reply_markup=reply_markup)
     return CHOOSING_SUBJECT_TYPE
 
 
-def subject_type_choosing(bot, update, user_data):
+def subject_type_choosing(update, context):
     subject_type = update.message.text
-    user_data['subject'] = update.message.text
+    context.user_data['subject'] = update.message.text
     reply_message = f"Okay, type is {subject_type}. Now choose the real subject of this type"
     if subject_type == keyboards['subject_types'][0][0]:
         reply_markup = ReplyKeyboardMarkup(keyboards['user_subjects'], one_time_keyboard=True)
-        bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=reply_markup)
+        context.bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=reply_markup)
         return CHOOSING_USER_SUBJECT
     elif subject_type is keyboards['subject_types'][1][0]:
         reply_markup = ReplyKeyboardMarkup(keyboards['lastfm_subjects'], one_time_keyboard=True)
-        bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=reply_markup)
+        context.bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=reply_markup)
         return CHOOSING_LASTFM_SUBJECT
 
 
-def lastfm_subject_choosing(bot, update, user_data):
+def lastfm_subject_choosing(update, context):
     lastfm_subject = update.message.text
-    user_data['lastfm_subject'] = update.message.text
+    context.user_data['lastfm_subject'] = update.message.text
     reply_message = f"Okay, last.fm subject is {lastfm_subject}. Now choose among what days should I look up"
 
     reply_markup = ReplyKeyboardMarkup(keyboards['periods'], one_time_keyboard=True)
-    bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=reply_markup)
+    context.bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=reply_markup)
 
     return CHOOSING_PERIOD
 
 
-def user_subject_choosing(bot, update, user_data):
+def user_subject_choosing(update, context):
     user_subject = update.message.text
-    user_data['user_subject'] = update.message.text
+    context.user_data['user_subject'] = update.message.text
     reply_message = f"Okay, user subject is {user_subject}. Now choose among what days should I look up"
 
     reply_markup = ReplyKeyboardMarkup(keyboards['periods'], one_time_keyboard=True)
-    bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=reply_markup)
+    context.bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=reply_markup)
 
     return CHOOSING_PERIOD
 
 
-def period_choosing(bot, update, user_data):
+def period_choosing(update, context):
     period = update.message.text
-    user_data['period'] = period
+    context.user_data['period'] = period
     reply_message = f"Okay, period is {period}. There's left only to choose graph type"
 
     reply_markup = ReplyKeyboardMarkup(keyboards['graphs'], one_time_keyboard=True)
-    bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=reply_markup)
+    context.bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=reply_markup)
 
     return CHOOSING_GRAPH
 
 
 @send_action(telegram.ChatAction.UPLOAD_PHOTO)
-def graph_choosing(bot, update, user_data):
+def graph_choosing(update, context):
     graph = update.message.text
-    user_data['graph'] = graph
+    context.user_data['graph'] = graph
     reply_message = f"Everything is okay, graph type is {graph}. Wait for a moment untill I'll finish generating image"
 
-    bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=remove_keyboard)
+    context.bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=remove_keyboard)
 
     controller = controllers.UserController('niedego', update.message.chat_id)
     file = controller.scrobbles_world_map(2)
 
-    bot.send_photo(chat_id=update.message.chat_id, caption=f'Enjoy this {graph.lower()}', photo=open(file, 'rb'))
+    context.bot.send_photo(chat_id=update.message.chat_id, caption=f'Enjoy this {graph.lower()}', photo=open(file, 'rb'))
 
     return ConversationHandler.END
 
 
-def wrong_response(bot, update, user_data):
+def wrong_response(update, context):
     raise NotImplemented
 
 # </editor-fold>
