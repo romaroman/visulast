@@ -22,6 +22,8 @@ class Configuration(metaclass=Singleton):
 
             self.app_name = self.config['appName']
             self.app_version = self.config['appVersion']
+
+            self.developerTelegramID = self.config['developerTelegramID']
         except (KeyError, TypeError) as e:
             critical_error_handler('Something went wrong', e)
 

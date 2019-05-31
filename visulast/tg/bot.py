@@ -1,66 +1,68 @@
-from telegram.ext import Updater, ConversationHandler, CommandHandler, RegexHandler, Filters, MessageHandler, \
-    PicklePersistence
-
+from telegram.ext import Updater, ConversationHandler, CommandHandler, RegexHandler, Filters, MessageHandler
 from visulast.tg import commands
 from visulast.config import Configuration
 from visulast.utils.helpers import keyboard_to_regex, get_logger
 
 logger = get_logger(__name__)
 
-CHOOSING_SUBJECT = 0
-CHOOSING_PERIOD = 1
-CHOOSING_GRAPH = 2
-CHOOSING_HOW = 3
+END = -1
+CHOOSING_SUBJECT_TYPE, CHOOSING_USER_SUBJECT, CHOOSING_LASTFM_SUBJECT, CHOOSING_PERIOD, CHOOSING_GRAPH, CHOOSING_HOW, CONFIRMATION = range(7)
 
 
-def main():
-    pp = PicklePersistence(filename='bot')
-    updater = Updater(token=Configuration().tokens.telegram_bot, persistence=pp, use_context=True)
-    dispatcher = updater.dispatcher
-
-    hs = [
+def attach_handlers(dispatcher):
+    handlers = [
         ConversationHandler(
             entry_points=[
                 CommandHandler('visualize', commands.visualize, pass_user_data=True),
             ],
             states={
-                CHOOSING_SUBJECT: [
-                    MessageHandler(Filters.regex(f"^({keyboard_to_regex(commands.keyboards['subjects'])})$"),
-                                   commands.visualize, pass_user_data=True)
+                CHOOSING_SUBJECT_TYPE: [
+                    MessageHandler(Filters.regex(f"^({keyboard_to_regex(commands.keyboards['subject_types'])})$"),
+                                   commands.subject_type_choosing, pass_user_data=True)
+                ],
+                CHOOSING_USER_SUBJECT: [
+                    MessageHandler(Filters.regex(f"^({keyboard_to_regex(commands.keyboards['user_subjects'])})$"),
+                                   commands.user_subject_choosing, pass_user_data=True)
+                ],
+                CHOOSING_LASTFM_SUBJECT: [
+                    MessageHandler(Filters.regex(f"^({keyboard_to_regex(commands.keyboards['lastfm_subjects'])})$"),
+                                   commands.lastfm_subject_choosing, pass_user_data=True)
                 ],
                 CHOOSING_PERIOD: [
                     MessageHandler(Filters.regex(f"^({keyboard_to_regex(commands.keyboards['periods'])})$"),
-                                   commands.period_choice, pass_user_data=True),
-                    MessageHandler(Filters.regex('^Custom$'), commands.custom_period_choice, pass_user_data=True),
+                                   commands.period_choosing, pass_user_data=True),
                 ],
                 CHOOSING_GRAPH: [
                     MessageHandler(Filters.regex(f"^({keyboard_to_regex(commands.keyboards['graphs'])})$"),
-                                   commands.graph_choice, pass_user_data=True),
-
+                                   commands.graph_choosing, pass_user_data=True),
                 ],
-                CHOOSING_HOW: [
-                    MessageHandler(Filters.regex(f"^({keyboard_to_regex(commands.keyboards['how'])})$"),
-                                   commands.how_choice, pass_user_data=True),
+                CONFIRMATION: [
+
                 ],
             },
             fallbacks=[
                 CommandHandler('abort', commands.abort, pass_user_data=True),
             ],
-            name="Regular conversation",
-            persistent=True
-
+            allow_reentry=True,
         ),
-        CommandHandler('abort', commands.abort, pass_user_data=True),
-        CommandHandler('abort', commands.abort, pass_user_data=True),
-        CommandHandler('abort', commands.abort, pass_user_data=True),
-        CommandHandler('abort', commands.abort, pass_user_data=True),
-        CommandHandler('abort', commands.abort, pass_user_data=True),
-        CommandHandler('abort', commands.abort, pass_user_data=True),
-        CommandHandler('abort', commands.abort, pass_user_data=True),
+        CommandHandler('help', commands.help, pass_user_data=True),
+        CommandHandler('faq', commands.faq, pass_user_data=True),
+        CommandHandler('clean', commands.clean, pass_user_data=True),
+        CommandHandler('authenticate', commands.authenticate, pass_user_data=True),
+        CommandHandler('authorize', commands.authorize, pass_user_data=True),
+        CommandHandler('report', commands.report, pass_user_data=True),
+        CommandHandler('donate', commands.donate, pass_user_data=True),
     ]
 
-    for handler in hs:
+    for handler in handlers:
         dispatcher.add_handler(handler)
+
+
+def main():
+    updater = Updater(token=Configuration().tokens.telegram_bot)
+    dispatcher = updater.dispatcher
+
+    attach_handlers(dispatcher)
     dispatcher.add_error_handler(commands.error_callback)
 
     updater.start_polling()
