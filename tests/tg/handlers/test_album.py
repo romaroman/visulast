@@ -1,0 +1,1 @@
+from visulast.tg.handlers.album import album, album_title_response
