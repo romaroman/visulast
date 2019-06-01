@@ -1,12 +1,34 @@
 from functools import wraps
 import telegram
 from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup
+from telegram.ext import ConversationHandler, CommandHandler, Filters, MessageHandler
+
+import visulast.tg.helpers
+from visulast.tg.handlers.general import abort
 from visulast.utils.helpers import get_logger
 from visulast.core import controllers
 import visulast.tg.states as states
-from visulast.tg.keyboards import visualize as keyboard
+
 
 logger = get_logger(__name__)
+
+keyboards = {
+    'subject_types': [['Based on user library'], ['General last.fm domain data']],
+
+    'user_subjects': [['My library', 'My followers', 'My following']],
+
+    'lastfm_subjects': [['Artist', 'Album', 'Trends']],
+
+    'periods': [['Today', 'Week', 'Month', 'Quarter'],
+                ['Half a year', 'Year', 'Overall']],
+
+    'graphs': [['Histogram', 'Worldmap', 'Flow'],
+               ['Pie', 'Bar', 'Line'],
+               ['Swarm', 'Hear', 'Cluster']],
+
+    'how': [['Photo', 'File', 'Share Link', 'Telegram Link']]
+}
+
 
 
 def generate_reply_message(item, choice, next_item):
@@ -27,7 +49,7 @@ def send_action(action):
 
 
 def visualize(update, context):
-    reply_markup = ReplyKeyboardMarkup(keyboard['subject_types'], one_time_keyboard=True)
+    reply_markup = ReplyKeyboardMarkup(keyboards['subject_types'], one_time_keyboard=True)
     context.bot.send_message(
         chat_id=update.message.chat_id,
         text="Okay, choose what kind of subject to analyze", reply_markup=reply_markup
@@ -40,13 +62,13 @@ def subject_type_choosing(update, context):
     context.user_data['subject'] = update.message.text
     reply_message = generate_reply_message('type', subject_type, 'real subject')
 
-    if subject_type == keyboard['subject_types'][0][0]:
-        reply_markup = ReplyKeyboardMarkup(keyboard['user_subjects'], one_time_keyboard=True)
+    if subject_type == keyboards['subject_types'][0][0]:
+        reply_markup = ReplyKeyboardMarkup(keyboards['user_subjects'], one_time_keyboard=True)
         context.bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=reply_markup)
         return states.CHOOSING_USER_SUBJECT
 
-    elif subject_type is keyboard['subject_types'][1][0]:
-        reply_markup = ReplyKeyboardMarkup(keyboard['lastfm_subjects'], one_time_keyboard=True)
+    elif subject_type is keyboards['subject_types'][1][0]:
+        reply_markup = ReplyKeyboardMarkup(keyboards['lastfm_subjects'], one_time_keyboard=True)
         context.bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=reply_markup)
         return states.CHOOSING_LASTFM_SUBJECT
 
@@ -56,7 +78,7 @@ def lastfm_subject_choosing(update, context):
     context.user_data['lastfm_subject'] = update.message.text
     reply_message = generate_reply_message('last.fm subject', lastfm_subject, 'period')
 
-    reply_markup = ReplyKeyboardMarkup(keyboard['periods'], one_time_keyboard=True)
+    reply_markup = ReplyKeyboardMarkup(keyboards['periods'], one_time_keyboard=True)
     context.bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=reply_markup)
 
     return states.CHOOSING_PERIOD
@@ -67,7 +89,7 @@ def user_subject_choosing(update, context):
     context.user_data['user_subject'] = update.message.text
     reply_message = generate_reply_message('user subject', user_subject, 'period')
 
-    reply_markup = ReplyKeyboardMarkup(keyboard['periods'], one_time_keyboard=True)
+    reply_markup = ReplyKeyboardMarkup(keyboards['periods'], one_time_keyboard=True)
     context.bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=reply_markup)
 
     return states.CHOOSING_PERIOD
@@ -78,7 +100,7 @@ def period_choosing(update, context):
     context.user_data['period'] = period
     reply_message = generate_reply_message('period', period, 'graph')
 
-    reply_markup = ReplyKeyboardMarkup(keyboard['graphs'], one_time_keyboard=True)
+    reply_markup = ReplyKeyboardMarkup(keyboards['graphs'], one_time_keyboard=True)
     context.bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=reply_markup)
 
     return states.CHOOSING_GRAPH
@@ -105,3 +127,46 @@ def graph_choosing(update, context):
 # TODO: implement wrong choice saving state
 def wrong_response(update, context):
     raise NotImplemented
+
+
+HANDLERS = [
+    ConversationHandler(
+        entry_points=[
+            CommandHandler('visualize', visualize, pass_user_data=True),
+        ],
+        states={
+            states.CHOOSING_SUBJECT_TYPE: [
+                MessageHandler(Filters.regex(f"^({visulast.tg.helpers.keyboard_to_regex(keyboards['subject_types'])})$"),
+                               subject_type_choosing, pass_user_data=True)
+            ],
+            states.CHOOSING_USER_SUBJECT: [
+                MessageHandler(Filters.regex(f"^({visulast.tg.helpers.keyboard_to_regex(keyboards['user_subjects'])})$"),
+                               user_subject_choosing, pass_user_data=True)
+            ],
+            states.CHOOSING_LASTFM_SUBJECT: [
+                MessageHandler(Filters.regex(f"^({visulast.tg.helpers.keyboard_to_regex(keyboards['lastfm_subjects'])})$"),
+                               lastfm_subject_choosing, pass_user_data=True)
+            ],
+            states.CHOOSING_HOW_MUCH: [
+
+            ],
+            states.CHOOSING_PERIOD: [
+                MessageHandler(Filters.regex(f"^({visulast.tg.helpers.keyboard_to_regex(keyboards['periods'])})$"),
+                               period_choosing, pass_user_data=True),
+            ],
+            states.CHOOSING_GRAPH: [
+                MessageHandler(Filters.regex(f"^({visulast.tg.helpers.keyboard_to_regex(keyboards['graphs'])})$"),
+                               graph_choosing, pass_user_data=True),
+            ],
+            states.CONFIRMATION: [
+
+            ],
+        },
+        fallbacks=[
+            CommandHandler('abort', abort, pass_user_data=True),
+        ],
+        allow_reentry=True,
+        persistent=True,
+        name='visualize.conversation'
+    ),
+]

@@ -2,6 +2,7 @@
 import calendar
 import datetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
+from telegram.ext import CommandHandler, CallbackQueryHandler
 
 
 def create_callback_data(action, year, month, day):
@@ -119,3 +120,9 @@ def inline_handler(update, context):
             text="You selected %s" % (date.strftime("%d/%m/%Y")),
             reply_markup=ReplyKeyboardRemove()
         )
+
+
+HANDLERS = [
+    CommandHandler('calendar', calendar_handler),
+    CallbackQueryHandler(inline_handler)
+]

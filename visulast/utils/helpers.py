@@ -30,15 +30,6 @@ class Singleton(type):
         return cls._instances[cls]
 
 
-def keyboard_to_regex(keyboard):
-    res = ""
-    for row in keyboard:
-        for button in row:
-            if button != "Custom":
-                res += button + "|"
-    return res[:-1]
-
-
 def deprecated(func):
     @functools.wraps(func)
     def new_func(*args, **kwargs):

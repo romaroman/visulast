@@ -1,7 +1,13 @@
 from telegram import ReplyKeyboardMarkup
+from telegram.ext import ConversationHandler
 
 import visulast.tg.states as states
-from visulast.tg.keyboards import start as keyboard
+from visulast.tg.handlers.general import abort
+from visulast.tg.handlers.visualize import CommandHandler
+
+keyboards = {
+
+}
 
 
 def start(update, context):
@@ -12,3 +18,21 @@ def start(update, context):
         # reply_markup=reply_markup
     )
     return states.START
+
+
+HANDLERS = {
+    ConversationHandler(
+        entry_points=[
+            CommandHandler('start', start, pass_user_data=True),
+        ],
+        states={
+
+        },
+        fallbacks=[
+            CommandHandler('abort', abort, pass_user_data=True),
+        ],
+        allow_reentry=True,
+        persistent=True,
+        name='start.conversation'
+    ),
+}

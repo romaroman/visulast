@@ -33,7 +33,7 @@ def get_colour_scale(data):
 
 
 # TODO: implement saving image as numpy array without exceptions
-def save_fig(path, fig):
+def save_fig(path, fig, clean=True):
     directory = os.path.dirname(os.path.abspath(path))
     if not os.path.exists(directory):
         try:
@@ -41,12 +41,13 @@ def save_fig(path, fig):
         except FileExistsError:
             logger.warning('Path already exist, continuing...')
             pass
-    plt.subplots_adjust(0, 0, 1, 1, 0, 0)
-    for ax in fig.axes:
-        ax.axis('off')
-        ax.margins(0, 0)
-        ax.xaxis.set_major_locator(plt.NullLocator())
-        ax.yaxis.set_major_locator(plt.NullLocator())
+    if clean:
+        plt.subplots_adjust(0, 0, 1, 1, 0, 0)
+        for ax in fig.axes:
+            ax.axis('off')
+            ax.margins(0, 0)
+            ax.xaxis.set_major_locator(plt.NullLocator())
+            ax.yaxis.set_major_locator(plt.NullLocator())
     plt.savefig(path, pad_inches=0, bbox_inches='tight', dpi=150)
     logger.info(f'Saved figure to {path}')
 
@@ -59,25 +60,9 @@ def get_timestamp():
     return str(datetime.now()).replace(' ', '_')[:-7]
 
 
-class _View:
-    def __init__(self, name, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.name = name
-
-    def draw_world_map_basemap(self, data):
-        pass
-
-    def draw_histogram(self):
-        pass
-
-    def draw_piechart(self):
-        pass
-
-
-class UserView(_View):
+class UserView:
     def __init__(self, username):
         self.username = username
-        super(UserView, self).__init__(self)
 
     def draw_world_map_matplotlib(self, data):
         fig = plt.figure(figsize=figaspect(0.5))
@@ -146,40 +131,39 @@ class UserView(_View):
     def draw_entities_histogram(self, data):
         pass
 
-    def draw_tags_piechart(self, tags):
+    def draw_tags_piechart(self, tags, title):
         labels = [t[0].capitalize() for t in tags]
-        sizes = [t[1] for t in tags]
+        weights = [t[1] for t in tags]
         explode = (0.1, 0, 0, 0, 0, 0, 0, 0)
 
         fig, ax = plt.subplots()
-        ax.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%',
-                shadow=True, startangle=50)
+        ax.pie(weights, explode=explode, labels=labels, autopct='%1.1f%%', startangle=50)
         ax.axis('equal')
+
+        if self.username:
+            title += f' {self.username}'
+        ax.set_title(title)
 
         filename = f"{images_directory}/diagrams/piecharts/tags_{self.username}_{get_timestamp()}.png"
         save_fig(filename, fig)
         return filename
 
-    def draw_ticks_scrobble_tendency(self):
-        pass
+    def draw_horizontal_barchart(self, data, title):
+        labels = [d[0] for d in data]
+        weights = [d[1] for d in data]
 
-    def draw_horizontal_bar_char(self, data):
-        usernames = [d[0] for d in data]
-        playcount = [d[1] for d in data]
-        y_pos = np.arange(len(usernames))
-
+        plt.rcdefaults()
         fig, ax = plt.subplots()
-        ax.barh(y_pos, playcount, align='center', alpha=0.5)
-        ax.set_xticks(y_pos, playcount)
+
+        y_pos = np.arange(len(labels))
+
+        ax.barh(y_pos, weights, align='center')
         ax.set_yticks(y_pos)
-        ax.set_yticklabels(usernames)
+        ax.set_yticklabels(labels)
         ax.invert_yaxis()
+        ax.set_xlabel('Weight or playcount')
+        ax.set_title(title)
 
-        plt.show()
-
-
-if __name__ == '__main__':
-    v = UserView('niedego')
-    m = models.UserModel('niedego', '1231')
-    v.draw_horizontal_bar_char(m.get_friends_playcounts())
-    # v.draw_entities_histogram(m.get_top_artists())
+        filename = f"{images_directory}/diagrams/barcharts/{title.lower().replace(' ', '_')}_{self.username}_{get_timestamp()}.png"
+        save_fig(filename, fig, clean=False)
+        return filename

@@ -6,17 +6,8 @@ import visulast.core.vars as vars
 logger = get_logger(__name__)
 
 
-class _Model:
-    def __init__(self):
-        super(_Model, self).__init__()
-
-    def get_sql_data(self):
-        pass
-
-
-class UserModel(_Model):
+class UserModel:
     def __init__(self, name, telegram_id):
-        super(UserModel, self).__init__()
         self.username = name
         self.telegram_id = telegram_id
         self.lastfm_user = Configuration().lastfm_network.get_user(self.username)
@@ -71,15 +62,16 @@ class UserModel(_Model):
         return [(k, tags[k]) for k in sorted(tags, key=tags.get, reverse=True)][:limit]
 
     def get_friends_playcounts(self, limit=10):
-        # friends = scrappers.FriendsScrapper.get_friends_by_username(self.username)[:limit]
-        # data = [(friend, Configuration().lastfm_network.get_user(friend).get_playcount()) for friend in friends]
-        data = [('hungerous', 483503), ('Last_August', 196297), ('rettside', 165816), ('TsarkovPro', 123106), ('ShadeLord', 74435), ('Masterkatze', 65756), ('MamaObama', 60854), ('holkabobra', 55549), ('Lareenqoon', 30915), ('ToughGuy4x4', 25129)]
+        friends = scrappers.FriendsScrapper.get_friends_by_username(self.username)[:limit]
+        data = [(friend, Configuration().lastfm_network.get_user(friend).get_playcount()) for friend in friends]
         return sorted(data, key=lambda x: x[1], reverse=True)
 
+    def get_top_albums_data(self, limit=10):
+        return [(album.item.title, album.weight) for album in self.lastfm_user.get_top_albums(limit=limit)][::-1]
 
-class AristModel(_Model):
-    pass
+    def get_top_artists_data(self, limit=10):
+        return [(artist.item.name, artist.weight) for artist in self.lastfm_user.get_top_artists(limit=limit)][::-1]
 
 
 if __name__ == '__main__':
-    UserModel('niedego', 'asda').get_friends_playcounts()
+    UserModel('niedego', 'asda').get_top_albums_data()

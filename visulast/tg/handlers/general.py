@@ -1,8 +1,11 @@
 import telegram
+from telegram.ext import CommandHandler
+
 from visulast.utils.helpers import get_logger
 import visulast.tg.states as states
 from visulast.config import Configuration
 from visulast.utils.helpers import is_lastfm_user_real
+
 
 logger = get_logger(__name__)
 
@@ -82,3 +85,17 @@ def donate(update, context):
 def error_callback(update, context):
     logger.error('Update "%s" caused error "%s"', update, context.error)
     update.message.reply_text('Occured error "%s", report it with typing /report', context.error)
+
+
+HANDLERS = [
+    CommandHandler('help', get_help, pass_user_data=True),
+    CommandHandler('faq', get_faq, pass_user_data=True),
+
+    CommandHandler('authorize', authorize, pass_user_data=True),
+    CommandHandler('authenticate', authenticate, pass_user_data=True, pass_args=True),
+    CommandHandler('is_authenticated', check_username, pass_user_data=True),
+
+    CommandHandler('clean', clean, pass_user_data=True),
+    CommandHandler('report', report, pass_user_data=True),
+    CommandHandler('donate', donate, pass_user_data=True),
+]

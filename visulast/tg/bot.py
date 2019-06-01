@@ -1,17 +1,25 @@
 from telegram.ext import Updater, PicklePersistence
-from visulast.tg import commands
 from visulast.config import Configuration
+from visulast.tg.handlers.general import error_callback
 from visulast.utils.helpers import get_logger
-from visulast.tg.handlers import handlers
 from visulast.utils.helpers import PROJ_PATH
+
+import visulast.tg.handlers as handlers
+
 
 logger = get_logger(__name__)
 
 
 def attach_handlers(dispatcher):
-    for handler in handlers:
+    hs = []
+    hs.extend(handlers.general_handlers)
+    hs.extend(handlers.calendar_handlers)
+    hs.extend(handlers.visualize_handlers)
+    hs.extend(handlers.start_handlers)
+    hs.extend(handlers.configure_handlers)
+    for handler in hs:
         dispatcher.add_handler(handler)
-    logger.info(f'All {len(handlers)} where successfully attached')
+    logger.info(f'All {len(hs)} where successfully attached')
 
 
 def start():
@@ -22,7 +30,11 @@ def start():
     dispatcher = updater.dispatcher
     attach_handlers(dispatcher)
 
-    dispatcher.add_error_handler(commands.error_callback)
+    dispatcher.add_error_handler(error_callback)
 
     updater.start_polling()
     updater.idle()
+
+
+if __name__ == '__main__':
+    start()
