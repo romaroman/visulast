@@ -5,14 +5,14 @@ visualize = {
 
     'lastfm_subjects': [['Artist', 'Album', 'Trends']],
 
-    'periods': [['Today', 'Week', 'Month', 'Quartal'],
+    'periods': [['Today', 'Week', 'Month', 'Quarter'],
                 ['Half a year', 'Year', 'Overall']],
 
     'graphs': [['Histogram', 'Worldmap', 'Flow'],
                ['Pie', 'Bar', 'Line'],
                ['Swarm', 'Hear', 'Cluster']],
 
-    # 'how': [['Photo', 'File', 'Share Link', 'Telegram Link']]
+    'how': [['Photo', 'File', 'Share Link', 'Telegram Link']]
 }
 
 start = {

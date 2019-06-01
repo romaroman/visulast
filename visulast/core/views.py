@@ -2,6 +2,7 @@ import numpy as np
 from datetime import datetime
 import os
 
+import pylast
 import shapefile as shp
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -17,7 +18,7 @@ logger = get_logger(__name__)
 
 images_directory = f"{PROJ_PATH}out/images"
 mpl.rc('image', cmap='Greys_r')
-mpl.rcParams['text.antialiased'] = False
+mpl.rcParams['text.antialiased'] = True
 
 
 def get_colour_scale(data):
@@ -32,7 +33,7 @@ def get_colour_scale(data):
 
 
 # TODO: implement saving image as numpy array without exceptions
-def save_image(path, image):
+def save_fig(path, fig):
     directory = os.path.dirname(os.path.abspath(path))
     if not os.path.exists(directory):
         try:
@@ -40,8 +41,18 @@ def save_image(path, image):
         except FileExistsError:
             logger.warning('Path already exist, continuing...')
             pass
+    plt.subplots_adjust(0, 0, 1, 1, 0, 0)
+    for ax in fig.axes:
+        ax.axis('off')
+        ax.margins(0, 0)
+        ax.xaxis.set_major_locator(plt.NullLocator())
+        ax.yaxis.set_major_locator(plt.NullLocator())
+    plt.savefig(path, pad_inches=0, bbox_inches='tight', dpi=150)
+    logger.info(f'Saved figure to {path}')
 
-    # cv.imwrite(f'{path}.{ext}', image, [int(cv.IMWRITE_PNG_COMPRESSION), 0])
+
+def figure_to_image(plot):
+    pass
 
 
 def get_timestamp():
@@ -88,27 +99,31 @@ class UserView(_View):
             points = item.shape.points
             parts = item.shape.parts
             for i in range(len(parts)):
-                ax.add_patch(Polygon(
-                    points[parts[i]:] if i == len(parts) - 1 else points[parts[i]:parts[i + 1]],
-                    facecolor=rgb2hex(color), edgecolor='k', linewidth=0.5
-                ))
+                ax.add_patch(
+                    Polygon(
+                        points[parts[i]:] if i == len(parts) - 1 else points[parts[i]:parts[i + 1]],
+                        facecolor=rgb2hex(color), edgecolor='k', linewidth=0.5
+                    )
+                )
 
         filename = f"{images_directory}/worldmaps/{self.username}_{get_timestamp()}.png"
-
-        if not os.path.exists(images_directory):
-            os.makedirs(images_directory)
-        plt.savefig(filename, dpi=80)
-
+        save_fig(filename, fig)
         return filename
 
     def draw_classic_eight(self, data):
         labels = []
         images = []
-        for i in data:
-            images.append(scrappers.ImageScrapper.getAristImage(i.item.name))
-            labels.append((i.item.name, i.weight))
+        for entity in data:
+            images.append(scrappers.ImageScrapper.get_image_by_entity(entity))
 
-        filename = f"{images_directory}/classic/eight/artists/{self.username}_{get_timestamp()}"
+            if type(entity) == pylast.Artist:
+                label = entity.item.name
+                t = 'artist'
+            else:
+                label = entity.item.title
+                t = 'album'
+
+            labels.append((label, entity.weight))
 
         fig, axs = plt.subplots(nrows=2, ncols=4, gridspec_kw={'wspace': 0, 'hspace': 0})
         fig.subplots_adjust(wspace=0, hspace=0)
@@ -119,18 +134,18 @@ class UserView(_View):
             ax.axis('off')
 
             if labels:
-                name, weight = labels.pop()
-                ax.text(10, 150, f"{name}\n{weight}", fontsize=12, color='white')
+                label, weight = labels.pop()
+                ax.text(10, 150, f"{label}\n{weight}", fontsize=9, color='white')
 
-        fig.canvas.draw()
-        res_img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
-        res_img = res_img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-        plt.imshow(res_img)
-        plt.show()
-        pass
+        plt.gca().set_axis_off()
+        plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+        plt.margins(0, 0)
+        filename = f"{images_directory}/classic/eight/{t}/{self.username}_{get_timestamp()}.png"
+        save_fig(filename, fig)
+        return filename
 
 
 if __name__ == '__main__':
     v = UserView('niedego')
     m = models.UserModel('niedego', '1231')
-    v.draw_classic_eight(m.get_classic_eight_artists("overall"))
+    v.draw_classic_eight(m.get_classic_eight_albums("overall"))

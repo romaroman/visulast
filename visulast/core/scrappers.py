@@ -194,18 +194,24 @@ class ImageScrapper(object):
         super(ImageScrapper, self).__init__()
 
     @staticmethod
-    def getAristImage(artist_name):
-        req = requests.get(f"https://www.last.fm/music/{artist_name.replace(' ', '+')}")
+    def get_image_by_entity(entity):
+        imgclass = {
+            pylast.Album: 'cover-art',
+            pylast.Artist: 'avatar'
+        }[type(entity.item)]
+
+        req = requests.get(entity.item.get_url())
         soup = BeautifulSoup(req.text, features="lxml")
-        img_url = soup.findAll("img", {"class": "avatar"})[0].attrs['src']
-        if img_url == '':
-            logger.warning(f"Avatar wasn't found for {artist_name}")
+        img_url = soup.findAll("img", {"class": imgclass})
+
+        if not img_url:
+            logger.warning(f"Cover image wasn't found for {entity.item}")
+            return np.full((170, 170), 255, dtype=np.uint8)
         else:
-            response = requests.get(img_url)
+            response = requests.get(img_url[0].attrs['src'])
             image = np.array(Image.open(BytesIO(response.content)))
-            # image = np.asarray(bytearray(resp.read()), dtype="uint8")
             return image
 
 
 if __name__ == '__main__':
-    ImageScrapper.getAristImage('Cher')
+    ImageScrapper.get_image_by_entity()

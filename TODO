@@ -16,13 +16,13 @@ SATURDAY:
     HIGH PRIORITY:
         revise MVC architecture!!!
 
-        implement how choice with usage of inline markup
         also add inline options to generated image
         create some visualizations with seaborn or matplotlib or smthing else in notebook
         implement another 5 visualizations (classic eight style, piecharts, barcharts, smthin else)
         add additional handler for chat_data intialization (ConversationHandler with /start)
         add parse support to controller for generation
         migrate last.fm vars for controllers
+        implement how choice with usage of inline markup
 
     MEDIUM PRIORITY:
         store some info in sql database

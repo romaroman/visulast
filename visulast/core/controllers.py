@@ -1,5 +1,7 @@
 from visulast.core import views, models
 from visulast.utils.helpers import get_logger
+import visulast.core.vars as vars
+
 
 logger = get_logger(__name__)
 
@@ -19,11 +21,13 @@ class UserController(_Controller):
     def artist_amount_world_map(self, limit=5):
         return self.view.draw_world_map_matplotlib(self.model.get_for_all_countries(what='a', limit=limit))
 
-    def classic_eight_artists(self, period):
-        return self.view.draw_classic_eight(self.model.get_classic_eight_artists(period))
+    def classic_eight_artists(self, period=vars.PERIOD_OVERALL):
+        return self.view.draw_classic_eight(self.model.get_classic_eight_artists(period), what='artists')
 
-    def classic_eight_albums(self, period):
-        return self.view.draw_classic_eight(self.model.get_classic_eight_albums(period))
+    def classic_eight_albums(self, period=vars.PERIOD_OVERALL):
+        return self.view.draw_classic_eight(self.model.get_classic_eight_albums(period), what='albums')
+
+
 
 
 if __name__ == '__main__':
