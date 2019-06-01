@@ -116,7 +116,7 @@ class UserView(_View):
         for entity in data:
             images.append(scrappers.ImageScrapper.get_image_by_entity(entity))
 
-            if type(entity) == pylast.Artist:
+            if type(entity.item) == pylast.Artist:
                 label = entity.item.name
                 t = 'artist'
             else:
@@ -125,8 +125,10 @@ class UserView(_View):
 
             labels.append((label, entity.weight))
 
+        plt.gca().set_axis_off()
+        plt.margins(0, 0)
         fig, axs = plt.subplots(nrows=2, ncols=4, gridspec_kw={'wspace': 0, 'hspace': 0})
-        fig.subplots_adjust(wspace=0, hspace=0)
+        fig.subplots_adjust(top=1, bottom=0, right=1, left=0, wspace=0, hspace=0)
         axs = axs.flatten()
         labels.reverse()
         for img, ax in zip(images, axs):
@@ -137,15 +139,47 @@ class UserView(_View):
                 label, weight = labels.pop()
                 ax.text(10, 150, f"{label}\n{weight}", fontsize=9, color='white')
 
-        plt.gca().set_axis_off()
-        plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
-        plt.margins(0, 0)
         filename = f"{images_directory}/classic/eight/{t}/{self.username}_{get_timestamp()}.png"
         save_fig(filename, fig)
         return filename
+
+    def draw_entities_histogram(self, data):
+        pass
+
+    def draw_tags_piechart(self, tags):
+        labels = [t[0].capitalize() for t in tags]
+        sizes = [t[1] for t in tags]
+        explode = (0.1, 0, 0, 0, 0, 0, 0, 0)
+
+        fig, ax = plt.subplots()
+        ax.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%',
+                shadow=True, startangle=50)
+        ax.axis('equal')
+
+        filename = f"{images_directory}/diagrams/piecharts/tags_{self.username}_{get_timestamp()}.png"
+        save_fig(filename, fig)
+        return filename
+
+    def draw_ticks_scrobble_tendency(self):
+        pass
+
+    def draw_horizontal_bar_char(self, data):
+        usernames = [d[0] for d in data]
+        playcount = [d[1] for d in data]
+        y_pos = np.arange(len(usernames))
+
+        fig, ax = plt.subplots()
+        ax.barh(y_pos, playcount, align='center', alpha=0.5)
+        ax.set_xticks(y_pos, playcount)
+        ax.set_yticks(y_pos)
+        ax.set_yticklabels(usernames)
+        ax.invert_yaxis()
+
+        plt.show()
 
 
 if __name__ == '__main__':
     v = UserView('niedego')
     m = models.UserModel('niedego', '1231')
-    v.draw_classic_eight(m.get_classic_eight_albums("overall"))
+    v.draw_horizontal_bar_char(m.get_friends_playcounts())
+    # v.draw_entities_histogram(m.get_top_artists())

@@ -213,5 +213,19 @@ class ImageScrapper(object):
             return image
 
 
+class FriendsScrapper(object):
+    def __init__(self):
+        super(FriendsScrapper, self).__init__()
+
+    @staticmethod
+    def get_friends_by_username(username):
+        target_class = 'link-block-target'
+        req = requests.get(f'https://www.last.fm/user/{username}/following')
+        soup = BeautifulSoup(req.text, features="lxml")
+        usernames = soup.findAll("a", {"class": target_class})
+        return [user.contents[0] for user in usernames]
+
+
 if __name__ == '__main__':
-    ImageScrapper.get_image_by_entity()
+    # ImageScrapper.get_image_by_entity()
+    print(FriendsScrapper.get_friends_by_username('niedego'))

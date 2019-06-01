@@ -1,7 +1,7 @@
 from visulast.core import scrappers
 from visulast.utils.helpers import get_logger
 from visulast.config import Configuration
-
+import visulast.core.vars as vars
 
 logger = get_logger(__name__)
 
@@ -41,17 +41,45 @@ class UserModel(_Model):
                     countries[country] = v
         return countries
 
-    def get_scrobbles_per_country(self):
-        return
-
     def get_classic_eight_albums(self, period):
         return self.lastfm_user.get_top_albums(period, 8)
 
     def get_classic_eight_artists(self, period):
         return self.lastfm_user.get_top_artists(period, 8)
 
+    def get_top_artists(self, limit=10):
+        return self.lastfm_user.get_top_artists(vars.PERIOD_OVERALL, limit)
+
+    def get_top_albums(self, limit=10):
+        return self.lastfm_user.get_top_albums(vars.PERIOD_OVERALL, limit)
+
+    def get_top_tracks(self, limit=10):
+        return self.lastfm_user.get_top_tracks(vars.PERIOD_OVERALL, limit)
+
+    def get_top_tags(self, limit=5):
+        artists = self.get_top_artists(limit=5)
+        tags = {}
+        for artist in artists:
+            artist_tags = artist.item.get_top_tags(limit=5)
+            for artist_tag in artist_tags:
+                tag_name = artist_tag.item.name.lower()
+                if tag_name in tags.keys():
+                    tags[tag_name] += 1
+                else:
+                    tags[tag_name] = 1
+
+        return [(k, tags[k]) for k in sorted(tags, key=tags.get, reverse=True)][:limit]
+
+    def get_friends_playcounts(self, limit=10):
+        # friends = scrappers.FriendsScrapper.get_friends_by_username(self.username)[:limit]
+        # data = [(friend, Configuration().lastfm_network.get_user(friend).get_playcount()) for friend in friends]
+        data = [('hungerous', 483503), ('Last_August', 196297), ('rettside', 165816), ('TsarkovPro', 123106), ('ShadeLord', 74435), ('Masterkatze', 65756), ('MamaObama', 60854), ('holkabobra', 55549), ('Lareenqoon', 30915), ('ToughGuy4x4', 25129)]
+        return sorted(data, key=lambda x: x[1], reverse=True)
+
 
 class AristModel(_Model):
+    pass
 
-    def smthin(self):
-        pass
+
+if __name__ == '__main__':
+    UserModel('niedego', 'asda').get_friends_playcounts()

@@ -16,7 +16,7 @@ SATURDAY:
     HIGH PRIORITY:
         revise MVC architecture!!!
 
-        also add inline options to generated image
+        add inline options to generated image
         create some visualizations with seaborn or matplotlib or smthing else in notebook
         implement another 5 visualizations (classic eight style, piecharts, barcharts, smthin else)
         add additional handler for chat_data intialization (ConversationHandler with /start)
