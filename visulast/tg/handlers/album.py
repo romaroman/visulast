@@ -178,7 +178,6 @@ HANDLERS = [
         fallbacks=[
             CommandHandler('abort', abort, pass_user_data=True),
         ],
-
         allow_reentry=True,
         persistent=True,
         name='album.conversation'
