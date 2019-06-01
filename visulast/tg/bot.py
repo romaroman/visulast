@@ -17,15 +17,16 @@ def attach_handlers(dispatcher):
     hs.extend(handlers.visualize_handlers)
     hs.extend(handlers.start_handlers)
     hs.extend(handlers.configure_handlers)
+    hs.extend(handlers.album_handlers)
     for handler in hs:
         dispatcher.add_handler(handler)
-    logger.info(f'All {len(hs)} where successfully attached')
+    logger.info(f'All {len(hs)} handlers where successfully attached')
 
 
 def start():
     updater = Updater(
         token=Configuration().tokens.telegram_bot, use_context=True,
-        persistence=PicklePersistence(filename=f'{PROJ_PATH}cache/visulast.pkl')
+        persistence=PicklePersistence(filename=f'{PROJ_PATH}cache/visulast.pkl'),
     )
     dispatcher = updater.dispatcher
     attach_handlers(dispatcher)

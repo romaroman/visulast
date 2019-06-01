@@ -30,7 +30,6 @@ keyboards = {
 }
 
 
-
 def generate_reply_message(item, choice, next_item):
     return f"Okay, {item} is {choice.lower()}. Now choose {next_item}:"
 

@@ -60,11 +60,10 @@ def get_timestamp():
     return str(datetime.now()).replace(' ', '_')[:-7]
 
 
-class UserView:
-    def __init__(self, username):
-        self.username = username
+class GeneralView:
 
-    def draw_world_map_matplotlib(self, data):
+    @staticmethod
+    def draw_world_map_matplotlib(data):
         fig = plt.figure(figsize=figaspect(0.5))
         ax = plt.Axes(fig, [0.025, 0, 0.95, 1])
         ax.set_axis_off()
@@ -91,11 +90,12 @@ class UserView:
                     )
                 )
 
-        filename = f"{images_directory}/worldmaps/{self.username}_{get_timestamp()}.png"
+        filename = f"{images_directory}/worldmaps/{get_timestamp()}.png"
         save_fig(filename, fig)
         return filename
 
-    def draw_classic_eight(self, data):
+    @staticmethod
+    def draw_classic_eight(data):
         labels = []
         images = []
         for entity in data:
@@ -124,14 +124,16 @@ class UserView:
                 label, weight = labels.pop()
                 ax.text(10, 150, f"{label}\n{weight}", fontsize=9, color='white')
 
-        filename = f"{images_directory}/classic/eight/{t}/{self.username}_{get_timestamp()}.png"
+        filename = f"{images_directory}/classic/eight/{t}/{get_timestamp()}.png"
         save_fig(filename, fig)
         return filename
 
-    def draw_entities_histogram(self, data):
+    @staticmethod
+    def draw_entities_histogram(data):
         pass
 
-    def draw_tags_piechart(self, tags, title):
+    @staticmethod
+    def draw_tags_piechart(tags, title):
         labels = [t[0].capitalize() for t in tags]
         weights = [t[1] for t in tags]
         explode = (0.1, 0, 0, 0, 0, 0, 0, 0)
@@ -140,15 +142,14 @@ class UserView:
         ax.pie(weights, explode=explode, labels=labels, autopct='%1.1f%%', startangle=50)
         ax.axis('equal')
 
-        if self.username:
-            title += f' {self.username}'
         ax.set_title(title)
 
-        filename = f"{images_directory}/diagrams/piecharts/tags_{self.username}_{get_timestamp()}.png"
+        filename = f"{images_directory}/diagrams/piecharts/tags_{get_timestamp()}.png"
         save_fig(filename, fig)
         return filename
 
-    def draw_horizontal_barchart(self, data, title):
+    @staticmethod
+    def draw_horizontal_barchart(data, title):
         labels = [d[0] for d in data]
         weights = [d[1] for d in data]
 
@@ -162,8 +163,8 @@ class UserView:
         ax.set_yticklabels(labels)
         ax.invert_yaxis()
         ax.set_xlabel('Weight or playcount')
-        ax.set_title(title)
+        ax.set_title('Bar chart weight representation of ' + title)
 
-        filename = f"{images_directory}/diagrams/barcharts/{title.lower().replace(' ', '_')}_{self.username}_{get_timestamp()}.png"
+        filename = f"{images_directory}/diagrams/barcharts/{title.lower().replace(' ', '_')}_{get_timestamp()}.png"
         save_fig(filename, fig, clean=False)
         return filename
