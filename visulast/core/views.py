@@ -3,15 +3,14 @@ from datetime import datetime
 import os
 
 import pylast
-import shapefile as shp
+import shapefile
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.figure import figaspect
 from matplotlib.patches import Polygon
 from matplotlib.colors import rgb2hex
 
-from visulast.core import scrappers
-from visulast.core import models
+from visulast.core import scrappers, models
 from visulast.utils.helpers import get_logger, PROJ_PATH, SHAPE_FILE
 
 logger = get_logger(__name__)
@@ -60,6 +59,17 @@ def get_timestamp():
     return str(datetime.now()).replace(' ', '_')[:-7]
 
 
+def shorten_label(label):
+    if len(label) > 25:
+        parts = label.split(' ')
+        new_label = ''
+        while len(new_label) < 20:
+            new_label += parts.pop(0) + ' '
+        return new_label + '...'
+    else:
+        return label
+
+
 class GeneralView:
 
     @staticmethod
@@ -70,7 +80,7 @@ class GeneralView:
         ax.set_xlim(-180, 180)
         ax.set_ylim(-60, 90)
         fig.add_axes(ax)
-        shapes = shp.Reader(SHAPE_FILE, encodingErrors="replace")
+        shapes = shapefile.Reader(SHAPE_FILE, encodingErrors="replace")
         colours = get_colour_scale(data)
 
         for item in shapes.iterShapeRecords():
@@ -133,24 +143,25 @@ class GeneralView:
         pass
 
     @staticmethod
-    def draw_tags_piechart(tags, title):
-        labels = [t[0].capitalize() for t in tags]
-        weights = [t[1] for t in tags]
-        explode = (0.1, 0, 0, 0, 0, 0, 0, 0)
+    def draw_pie_chart(data, title):
+
+        labels = [shorten_label(t[0]).capitalize() for t in data]
+        weights = [t[1] for t in data]
+        # explode = (0.1, 0, 0, 0, 0, 0, 0, 0)
 
         fig, ax = plt.subplots()
-        ax.pie(weights, explode=explode, labels=labels, autopct='%1.1f%%', startangle=50)
+        _, _, texts = ax.pie(weights, labels=labels, autopct='%1.1f%%', startangle=50)
         ax.axis('equal')
+        plt.setp(texts, size=8)
+        ax.set_title('Pie chart weight representation of ' + title)
 
-        ax.set_title(title)
-
-        filename = f"{images_directory}/diagrams/piecharts/tags_{get_timestamp()}.png"
-        save_fig(filename, fig)
+        filename = f"{images_directory}/charts/pie/{title}_{get_timestamp()}.png"
+        save_fig(filename, fig, clean=False)
         return filename
 
     @staticmethod
-    def draw_horizontal_barchart(data, title):
-        labels = [d[0] for d in data]
+    def draw_horizontal_bar_chart(data, title):
+        labels = [shorten_label(d[0]) for d in data]
         weights = [d[1] for d in data]
 
         plt.rcdefaults()
@@ -162,9 +173,16 @@ class GeneralView:
         ax.set_yticks(y_pos)
         ax.set_yticklabels(labels)
         ax.invert_yaxis()
+        for i, v in enumerate(weights):
+            plt.text(v, i, " " + str(v), va='center')
+
+        ax.axes.get_xaxis().set_visible(False)
+        for spine in plt.gca().spines.values():
+            spine.set_visible(False)
+
         ax.set_xlabel('Weight or playcount')
         ax.set_title('Bar chart weight representation of ' + title)
 
-        filename = f"{images_directory}/diagrams/barcharts/{title.lower().replace(' ', '_')}_{get_timestamp()}.png"
+        filename = f"{images_directory}/charts/bar/{title}_{get_timestamp()}.png"
         save_fig(filename, fig, clean=False)
         return filename

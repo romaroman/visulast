@@ -1,13 +1,12 @@
 from functools import wraps
-import telegram
-from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup
+from telegram import ReplyKeyboardRemove, ReplyKeyboardMarkup, ChatAction, ParseMode
 from telegram.ext import ConversationHandler, CommandHandler, Filters, MessageHandler
 
 import visulast.tg.helpers
 from visulast.tg.handlers.general import abort
 from visulast.utils.helpers import get_logger
 from visulast.core import controllers
-import visulast.tg.states as states
+from visulast.tg import states
 
 
 logger = get_logger(__name__)
@@ -105,7 +104,7 @@ def period_choosing(update, context):
     return states.CHOOSING_GRAPH
 
 
-@send_action(telegram.ChatAction.UPLOAD_PHOTO)
+@send_action(ChatAction.UPLOAD_PHOTO)
 def graph_choosing(update, context):
     graph = update.message.text
     context.user_data['graph'] = graph

@@ -1,25 +1,25 @@
 import uuid
 import re
-from io import BytesIO, StringIO
+from io import BytesIO
 
 import requests
 from PIL import Image
 from bs4 import BeautifulSoup
 from collections import defaultdict
 
-from urllib.request import urlopen
 import pylast
 import wikipedia as wiki
-import googlemaps as gmaps
-import musicbrainzngs as mbz
+import googlemaps
+import musicbrainzngs
 import numpy as np
+
 from visulast.config import Configuration
 from visulast.utils.helpers import get_logger, extract_countries
 
 legal_countries = extract_countries()
 logger = get_logger(__name__)
-gmaps_client = gmaps.Client(key=Configuration().tokens.google_maps_api)
-mbz.set_useragent(app=Configuration().app_name, version=Configuration().app_version)
+gmaps_client = googlemaps.Client(key=Configuration().tokens.google_maps_api)
+musicbrainzngs.set_useragent(app=Configuration().app_name, version=Configuration().app_version)
 session = uuid.uuid4()
 
 
@@ -155,7 +155,7 @@ class CountryOfArtistScrapper:
         mbid = lastfm_artist.get_mbid()
         if mbid:
             try:
-                mb_art = mbz.get_artist_by_id(id=mbid)
+                mb_art = musicbrainzngs.get_artist_by_id(id=mbid)
                 country = mb_art['artist']['area']['name']
                 if country not in legal_countries:
                     country = CountryOfArtistScrapper.normalize_with_dictionary(country)
@@ -165,7 +165,7 @@ class CountryOfArtistScrapper:
             except KeyError:
                 pass
         else:
-            res = mbz.search_artists(query=lastfm_artist.name)
+            res = musicbrainzngs.search_artists(query=lastfm_artist.name)
             if res:
                 for entry in res['artist-list']:
                     if entry['name'] and entry['name'].lower() == lastfm_artist.name.lower():
@@ -224,8 +224,3 @@ class FriendsScrapper(object):
         soup = BeautifulSoup(req.text, features="lxml")
         usernames = soup.findAll("a", {"class": target_class})
         return [user.contents[0] for user in usernames]
-
-
-if __name__ == '__main__':
-    # ImageScrapper.get_image_by_entity()
-    print(FriendsScrapper.get_friends_by_username('niedego'))

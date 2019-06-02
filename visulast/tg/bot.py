@@ -4,7 +4,7 @@ from visulast.tg.handlers.general import error_callback
 from visulast.utils.helpers import get_logger
 from visulast.utils.helpers import PROJ_PATH
 
-import visulast.tg.handlers as handlers
+from visulast.tg import handlers
 
 
 logger = get_logger(__name__)
@@ -18,6 +18,7 @@ def attach_handlers(dispatcher):
     hs.extend(handlers.start_handlers)
     hs.extend(handlers.configure_handlers)
     hs.extend(handlers.album_handlers)
+    hs.extend(handlers.user_handlers)
     for handler in hs:
         dispatcher.add_handler(handler)
     logger.info(f'All {len(hs)} handlers where successfully attached')

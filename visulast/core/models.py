@@ -1,7 +1,7 @@
 from visulast.core import scrappers
 from visulast.utils.helpers import get_logger
 from visulast.config import Configuration
-import visulast.core.vars as vars
+from visulast.core import vars
 
 logger = get_logger(__name__)
 
@@ -96,7 +96,6 @@ class AlbumModel:
 
     def get_tracks_userplaycount(self, username):
         # TODO: realize
-
         return [(track, track.get_userplaycount(username)) for track in self.entity.get_tracks()]
 
     def get_tracks(self):
@@ -127,6 +126,31 @@ class ArtistModel:
         return self.entity.get_top_albums(limit=limit)
 
 
-if __name__ == '__main__':
-    m = AlbumModel('DJ Shadow', 'Endtroducing.....')
-    print(m.get_tracks_playcount())
+class TagModel:
+    def __init__(self, name):
+        pass
+
+    def __new__(cls, name, *args, **kwargs):
+        instance = super(TagModel, cls).__new__(cls)
+        instance.__init__(name)
+        entity = Configuration().lastfm_network.get_tag(name=name)
+        if entity.get_mbid():
+            instance.entity = entity
+            return instance
+        else:
+            return None
+
+
+class TrackModel:
+    def __init__(self, artist_name, track_title):
+        pass
+
+    def __new__(cls, artist_name, track_title, *args, **kwargs):
+        instance = super(TrackModel, cls).__new__(cls)
+        instance.__init__(artist_name, track_title)
+        entity = Configuration().lastfm_network.get_track(artist=artist_name, title=track_title)
+        if entity.get_mbid():
+            instance.entity = entity
+            return instance
+        else:
+            return None
