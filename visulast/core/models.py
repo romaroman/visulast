@@ -79,7 +79,7 @@ class UserModel:
     # </editor-fold>
 
     # <editor-fold desc="Tags">
-    def get_top_tags(self, limit=5):
+    def get_tags_data(self, limit=5):
         artists = self.get_top_artists(limit=5)
         tags = {}
         for artist in artists:
@@ -92,15 +92,21 @@ class UserModel:
                     tags[tag_name] = 1
 
         return [(k, tags[k]) for k in sorted(tags, key=tags.get, reverse=True)][:limit]
-
     # </editor-fold>
 
     # <editor-fold desc="Friends">
+    def get_friends(self, limit=10):
+        return scrappers.FriendsScrapper.get_friends_by_username(self.entity.get_name())[:limit]
+
     def get_friends_playcount(self, limit=10):
-        friends = scrappers.FriendsScrapper.get_friends_by_username(self.entity.get_name())[:limit]
+        friends = self.get_friends(limit=limit)
         data = [(friend, Configuration().lastfm_network.get_user(friend).get_playcount()) for friend in friends]
         return sorted(data, key=lambda x: x[1], reverse=True)
     # </editor-fold>
+
+    def get_compatibility_by_friends_and_tags(self, friends_limit=10, tags_limit=10):
+        friends = self.get_friends(limit=friends_limit)
+        return [(friend, UserModel(friend).get_tags_data(limit=tags_limit)) for friend in friends]
 
 
 class AlbumModel:

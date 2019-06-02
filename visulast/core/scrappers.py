@@ -223,4 +223,4 @@ class FriendsScrapper(object):
         req = requests.get(f'https://www.last.fm/user/{username}/following')
         soup = BeautifulSoup(req.text, features="lxml")
         usernames = soup.findAll("a", {"class": target_class})
-        return [user.contents[0] for user in usernames]
+        return [user.contents[0] for user in usernames][::-1]

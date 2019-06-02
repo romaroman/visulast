@@ -15,7 +15,7 @@ from visulast.utils.helpers import get_logger, PROJ_PATH, SHAPE_FILE
 
 logger = get_logger(__name__)
 
-images_directory = f"{PROJ_PATH}out/images"
+images_directory = f"{PROJ_PATH}images"
 mpl.rc('image', cmap='Greys_r')
 mpl.rcParams['text.antialiased'] = True
 
@@ -73,7 +73,7 @@ def shorten_label(label):
 class GeneralView:
 
     @staticmethod
-    def draw_world_map_matplotlib(data):
+    def draw_world_map(data):
         fig = plt.figure(figsize=figaspect(0.5))
         ax = plt.Axes(fig, [0.025, 0, 0.95, 1])
         ax.set_axis_off()
@@ -100,12 +100,12 @@ class GeneralView:
                     )
                 )
 
-        filename = f"{images_directory}/worldmaps/{get_timestamp()}.png"
+        filename = f"{images_directory}/world_map/{get_timestamp()}.png"
         save_fig(filename, fig)
         return filename
 
     @staticmethod
-    def draw_classic_eight(data):
+    def draw_classic_eight_chart(data):
         labels = []
         images = []
         for entity in data:
@@ -113,10 +113,8 @@ class GeneralView:
 
             if type(entity.item) == pylast.Artist:
                 label = entity.item.name
-                t = 'artist'
             else:
                 label = entity.item.title
-                t = 'album'
 
             labels.append((label, entity.weight))
 
@@ -134,18 +132,14 @@ class GeneralView:
                 label, weight = labels.pop()
                 ax.text(10, 150, f"{label}\n{weight}", fontsize=9, color='white')
 
-        filename = f"{images_directory}/classic/eight/{t}/{get_timestamp()}.png"
+        filename = f"{images_directory}/classic_eight/{get_timestamp()}.png"
         save_fig(filename, fig)
         return filename
 
     @staticmethod
-    def draw_entities_histogram(data):
-        pass
+    def draw_pie_graph(data, title):
 
-    @staticmethod
-    def draw_pie_chart(data, title):
-
-        labels = [shorten_label(t[0]).capitalize() for t in data]
+        labels = [shorten_label(t[0]) for t in data]
         weights = [t[1] for t in data]
         # explode = (0.1, 0, 0, 0, 0, 0, 0, 0)
 
@@ -155,12 +149,12 @@ class GeneralView:
         plt.setp(texts, size=8)
         ax.set_title('Pie chart weight representation of ' + title)
 
-        filename = f"{images_directory}/charts/pie/{title}_{get_timestamp()}.png"
+        filename = f"{images_directory}/pie/{title}_{get_timestamp()}.png"
         save_fig(filename, fig, clean=False)
         return filename
 
     @staticmethod
-    def draw_horizontal_bar_chart(data, title):
+    def draw_horizontal_bar_graph(data, title):
         labels = [shorten_label(d[0]) for d in data]
         weights = [d[1] for d in data]
 
@@ -183,6 +177,159 @@ class GeneralView:
         ax.set_xlabel('Weight or playcount')
         ax.set_title('Bar chart weight representation of ' + title)
 
-        filename = f"{images_directory}/charts/bar/{title}_{get_timestamp()}.png"
+        filename = f"{images_directory}/horizontal_bar/{title}_{get_timestamp()}.png"
         save_fig(filename, fig, clean=False)
         return filename
+
+    @staticmethod
+    def draw_heat_map(data):
+        tags = []
+        friends = []
+        for friend, info in data:
+            friends.append(friend)
+            for tag, value in info:
+                if tag not in tags:
+                    tags.append(tag)
+
+        map = np.zeros((len(friends), len(tags)))
+        i = 0
+        for friend, info in data:
+            j = 0
+            for tag in tags:
+                for c_tag in info:
+                    if c_tag[0] == tag:
+                        map[i][j] += c_tag[1]
+                        break
+                j += 1
+            i += 1
+
+        filename = f"{images_directory}/heat_map/_{get_timestamp()}.png"
+        # save_fig(filename, fig, clean=False)
+        return filename
+
+    @staticmethod
+    def heatmap(data, row_labels, col_labels):
+        data = np.array([[3., 3., 3., 3., 2., 1., 1., 1., 0., 0., 0., 0., 0., 0., 0., 0.,
+                       0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                       0., 0.],
+                      [2., 2., 2., 0., 0., 0., 0., 0., 2., 2., 1., 1., 1., 0., 0., 0.,
+                       0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                       0., 0.],
+                      [0., 2., 2., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 3., 3., 3.,
+                       2., 2., 2., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                       0., 0.],
+                      [1., 1., 2., 0., 0., 0., 0., 0., 0., 3., 0., 0., 0., 0., 0., 0.,
+                       0., 0., 0., 2., 1., 1., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                       0., 0.],
+                      [4., 5., 3., 0., 0., 0., 0., 0., 0., 0., 0., 0., 3., 0., 0., 0.,
+                       0., 0., 0., 0., 0., 0., 0., 3., 1., 1., 1., 0., 0., 0., 0., 0.,
+                       0., 0.],
+                      [0., 0., 2., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.,
+                       0., 0., 0., 1., 1., 2., 0., 0., 0., 0., 0., 2., 2., 2., 0., 0.,
+                       0., 0.],
+                      [2., 3., 2., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                       0., 2., 0., 0., 0., 0., 0., 0., 0., 0., 0., 3., 0., 0., 2., 2.,
+                       0., 0.],
+                      [0., 2., 2., 0., 2., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 1.,
+                       1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                       2., 2.]])
+        col_labels = ['ambient',
+                'electronic',
+                'experimental',
+                'dark ambient',
+                'new wave',
+                'shoegaze',
+                'trip-hop',
+                'post-rock',
+                'dubstep',
+                'hip-hop',
+                'future garage',
+                '2-step',
+                'electronica',
+                'screamo',
+                'hardcore',
+                'emo',
+                'post-hardcore',
+                'seen live',
+                'real screamo',
+                'cloud rap',
+                'rap',
+                'russian',
+                'underground hip-hop',
+                'idm',
+                'chillout',
+                'drone',
+                'psychedelic',
+                'post-punk',
+                'lo-fi',
+                'indie',
+                'noise rock',
+                'noise',
+                '80s',
+                'industrial']
+        row_labels = ['Florian_y',
+                   'Hey_Canada',
+                   'Mr_Belldom',
+                   'ToughGuy4x4',
+                   'holkabobra',
+                   'MamaObama',
+                   'rettside',
+                   'Last_August']
+
+        cbarlabel = "harvest [t/year]"
+        ax = plt.gca()
+
+        # Plot the heatmap
+        im = ax.imshow(data, cmap="YlGn")
+
+        # Create colorbar
+        cbar = ax.figure.colorbar(im, ax=ax, cmap="YlGn")
+        cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom")
+
+        # We want to show all ticks...
+        ax.set_xticks(np.arange(data.shape[1]))
+        ax.set_yticks(np.arange(data.shape[0]))
+        # ... and label them with the respective list entries.
+        ax.set_xticklabels(col_labels)
+        ax.set_yticklabels(row_labels)
+
+        # Let the horizontal axes labeling appear on top.
+        ax.tick_params(top=True, bottom=False,
+                       labeltop=True, labelbottom=False)
+
+        # Rotate the tick labels and set their alignment.
+        plt.setp(ax.get_xticklabels(), rotation=-90, ha="right",
+                 rotation_mode="anchor")
+
+        # Turn spines off and create white grid.
+        for edge, spine in ax.spines.items():
+            spine.set_visible(False)
+
+        ax.set_xticks(np.arange(data.shape[1] + 1) - .5, minor=True)
+        ax.set_yticks(np.arange(data.shape[0] + 1) - .5, minor=True)
+        # ax.grid(which="minor", color="b", linestyle='-', linewidth=3)
+        ax.tick_params(which="minor", bottom=False, left=False)
+        plt.show()
+        return im, cbar
+
+    @staticmethod
+    def draw_stacked_bar_graph(data, title):
+        fig, ax = plt.subplots()
+
+        filename = f"{images_directory}/stacked_bar/{title}_{get_timestamp()}.png"
+        save_fig(filename, fig, clean=False)
+        return filename
+
+    @staticmethod
+    def _template(data, title):
+        fig, ax = plt.subplots()
+
+        filename = f"{images_directory}/stacked_bar/{title}_{get_timestamp()}.png"
+        save_fig(filename, fig, clean=False)
+        return filename
+
+
+if __name__ == '__main__':
+    # GeneralView.draw_heat_map(models.UserModel('niedego').get_compatibility_by_friends_and_tags(friends_limit=8, tags_limit=8))
+
+    GeneralView.heatmap(0,0,0)
