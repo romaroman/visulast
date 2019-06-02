@@ -114,7 +114,7 @@ def graph_choosing(update, context):
     context.bot.send_message(chat_id=update.message.chat_id, text=reply_message, reply_markup=ReplyKeyboardRemove())
 
     controller = controllers.UserController('niedego', update.message.chat_id)
-    file = controller.scrobbles_world_map(2)
+    file = controller.artists_playcount_world_map(2)
 
     context.bot.send_photo(chat_id=update.message.chat_id, caption=f'Enjoy this {graph.lower()}',
                            photo=open(file, 'rb'))

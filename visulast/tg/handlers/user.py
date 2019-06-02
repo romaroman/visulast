@@ -1,21 +1,17 @@
+import re
 from visulast.tg import states
 from visulast.tg import helpers
 from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove, ParseMode
 from telegram.ext import ConversationHandler, MessageHandler, Filters, CallbackQueryHandler, CommandHandler
-from visulast.core import scrappers, controllers, models, tools as core_helpers
+from visulast.core import controllers, models
 from visulast.tg.handlers.general import abort
 
 keyboards = {
     'source': [['My library', 'Specific user library']],
-    'subject': [['Artists', 'Albums', 'Tracks', 'Tags']],
-    'amount': [['5', '10', '20', 'All (max=30)']],
+    'subject': [['Artists', 'Albums', 'Tracks', 'Tags', 'Friends']],
+    'amount': [['1', '5', '8', '10'], ['20', '30', '40', 'All (max=50)']],
     'period': [['Overall', 'Week', 'Month'], ['3 Months', '6 Months', '12 Months']],
-    'representation': {
-        'Artists': [['Classic 8 view', 'Bar chart', 'Pie chart']],
-        'Albums': [['Classic 8 view', 'Bar chart', 'Pie chart']],
-        'Tracks': [['Bar chart', 'Pie chart']],
-        'Tags': [['Bar chart', 'Pie chart']],
-    }
+    'representation': [['Classic eight', 'World map'], ['Bar diagram', 'Pie diagram']],
 }
 
 USER_MODEL = None
@@ -49,7 +45,7 @@ def source_selection_response(update, context):
         context.bot.send_message(
             chat_id=update.message.chat_id,
             text="Type username or select among your friends",
-            reply_markup=ReplyKeyboardMarkup(keyboards['source'])
+            reply_markup=helpers.get_friends_keyboard(context.user_data['username'])
         )
         return states.USER_SPECIFIC_USER_TYPING
     elif source == 'My library':
@@ -57,21 +53,66 @@ def source_selection_response(update, context):
         USER_MODEL = models.UserModel(context.user_data['username'])
         context.bot.send_message(
             chat_id=update.message.chat_id,
-            text="Choose where from should I gather data",
-            reply_markup=ReplyKeyboardMarkup(keyboards['source'])
+            text="Choose subject which to draw",
+            reply_markup=ReplyKeyboardMarkup(keyboards['subject'])
         )
+        return states.USER_SUBJECT_SELECTION
+    # else:
+    #     context.bot.send_message(
+    #         chat_id=update.message.chat_id,
+    #         text="Wrong choice, dialog is finished",
+    #         reply_markup=ReplyKeyboardRemove()
+    #     )
+    #     return states.END
 
 
 def specific_user_typing_response(update, context):
-    pass
+    source = update.message.text
+    global USER_MODEL
+    USER_MODEL = models.UserModel(source)
+    if USER_MODEL:
+        context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text="Choose subject which to draw",
+            reply_markup=ReplyKeyboardMarkup(keyboards['subject'])
+        )
+        return states.USER_SUBJECT_SELECTION
+    else:
+        context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text="Such user doesn't exist, try again or type /abort"
+        )
 
 
 def subject_selection_response(update, context):
-    pass
+    subject = update.message.text
+    context.user_data['user']['subject'] = subject
+
+    context.bot.send_message(
+        chat_id=update.message.chat_id,
+        text="Now choose period over which I should look up",
+        reply_markup=ReplyKeyboardMarkup(keyboards['period'])
+    )
+    return states.USER_PERIOD_SELECTION
 
 
 def period_selection_response(update, context):
-    pass
+    period = update.message.text
+    if period == 'Custom':
+        context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text="Select dates between which you want to get info",
+            reply_markup=ReplyKeyboardMarkup(keyboards['period'])
+        )
+        return states.USER_CUSTOM_PERIOD_SELECTION
+
+    context.user_data['user']['period'] = helpers.convert_period_to_var(period)
+    context.bot.send_message(
+        chat_id=update.message.chat_id,
+        text="Now choose amount of stuff to retrieve",
+        reply_markup=ReplyKeyboardMarkup(keyboards['amount'])
+    )
+    return states.USER_AMOUNT_SELECTION
 
 
 def custom_period_selection_response(update, context):
@@ -79,11 +120,39 @@ def custom_period_selection_response(update, context):
 
 
 def amount_selection_response(update, context):
-    pass
+    amount = update.message.text
+    context.user_data['user']['amount'] = int(re.sub("\D", "", amount))
+    context.bot.send_message(
+        chat_id=update.message.chat_id,
+        text="Now choose type of chart",
+        reply_markup=ReplyKeyboardMarkup(keyboards['representation'])
+    )
+    return states.USER_REPRESENTATION_SELECTION
 
 
 def representation_selection_response(update, context):
-    pass
+    representation = update.message.text
+    context.user_data['user']['representation'] = representation
+
+    context.bot.send_message(
+        chat_id=update.message.chat_id,
+        text='Wait until I generate image',
+    )
+
+    image = controllers.UserController(USER_MODEL).process(
+        subject=context.user_data['user']['subject'],
+        period=context.user_data['user']['period'],
+        amount=context.user_data['user']['amount'],
+        representation=context.user_data['user']['representation'],
+    )
+
+    context.bot.send_photo(
+        chat_id=update.message.chat_id,
+        caption=f'Enjoy',
+        photo=open(image, 'rb'),
+        reply_markup=ReplyKeyboardRemove()
+    )
+    return states.END
 
 
 HANDLERS = {
@@ -93,25 +162,43 @@ HANDLERS = {
         ],
         states={
             states.USER_SOURCE_SELECTION: [
-                MessageHandler(Filters.regex(helpers.keyboard_to_regex(keyboards['source'])), source_selection_response)
+                MessageHandler(
+                    Filters.regex(helpers.keyboard_to_regex(keyboards['source'])),
+                    source_selection_response
+                )
             ],
             states.USER_SPECIFIC_USER_TYPING: [
-
+                MessageHandler(
+                    Filters.text,
+                    specific_user_typing_response
+                )
             ],
             states.USER_SUBJECT_SELECTION: [
-
+                MessageHandler(
+                    Filters.regex(helpers.keyboard_to_regex(keyboards['subject'])),
+                    subject_selection_response
+                )
             ],
             states.USER_PERIOD_SELECTION: [
-
+                MessageHandler(
+                    Filters.regex(helpers.keyboard_to_regex(keyboards['period'])),
+                    period_selection_response
+                )
             ],
             states.USER_CUSTOM_PERIOD_SELECTION: [
 
             ],
             states.USER_AMOUNT_SELECTION: [
-
+                MessageHandler(
+                    Filters.regex(helpers.keyboard_to_regex(keyboards['amount'])),
+                    amount_selection_response
+                )
             ],
             states.USER_REPRESENTATION_SELECTION: [
-
+                MessageHandler(
+                    Filters.regex(helpers.keyboard_to_regex(keyboards['representation'])),
+                    representation_selection_response
+                )
             ],
         },
         fallbacks=[

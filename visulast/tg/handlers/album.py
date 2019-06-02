@@ -83,13 +83,11 @@ def info_source_decision_response(update, context):
     context.user_data['album']['source'] = decision
 
     if decision == 'Specific user':
-        friends = scrappers.FriendsScrapper.get_friends_by_username(context.user_data['username'])
-        reply_markup = ReplyKeyboardMarkup([[friend] for friend in friends])
 
         context.bot.send_message(
             chat_id=update.message.chat_id,
             text='Type username or choose among your friends',
-            reply_markup=reply_markup
+            reply_markup=helpers.get_friends_keyboard(context.user_data['username'])
         )
         return states.ALBUM_SPECIFIC_USERNAME_SELECTION
 
@@ -154,6 +152,7 @@ def representation_selection_response(update, context):
         photo=open(image, 'rb'),
         reply_markup=ReplyKeyboardRemove()
     )
+    return states.END
 
 
 HANDLERS = [

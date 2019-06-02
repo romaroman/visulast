@@ -27,11 +27,11 @@ class UserModel:
         :return: countries: {'Russia': 120, 'Germany': 44, ...} (dictionary)
         """
         countries = {}
-        for i in self.entity.get_artists(limit=limit):
+        for i in self.entity.get_top_artists(limit=limit):
             country = scrappers.CountryOfArtistScrapper.get_one(i.item)
             v = 1
             if what == 's':
-                v = i.playcount
+                v = int(i.weight)
             if country:
                 if country in countries.keys():
                     countries[country] += v
@@ -39,21 +39,46 @@ class UserModel:
                     countries[country] = v
         return countries
 
-    def get_classic_eight_albums(self, period):
-        return self.entity.get_top_albums(period, 8)
-
-    def get_classic_eight_artists(self, period):
-        return self.entity.get_top_artists(period, 8)
+    # <editor-fold desc="Artists">
+    def get_classic_eight_artists(self, period=vars.PERIOD_OVERALL):
+        return self.entity.get_top_artists(period, limit=8)
 
     def get_top_artists(self, limit=10):
-        return self.entity.get_top_artists(vars.PERIOD_OVERALL, limit)
+        return self.entity.get_top_artists(vars.PERIOD_OVERALL, limit=limit)
+
+    def get_top_artists_data(self, limit=10):
+        return [(artist.item.name, artist.weight) for artist in self.entity.get_top_artists(limit=limit)][::-1]
+
+    def get_artists(self, period=vars.PERIOD_OVERALL, limit=10):
+        return self.entity.get_top_artists(period=period, limit=limit)
+
+    def get_artists_data(self, period=vars.PERIOD_OVERALL, limit=10):
+        return [(artist.item.name, artist.weight) for artist in self.entity.get_top_artists(period=period, limit=limit)][::-1]
+    # </editor-fold>
+
+    # <editor-fold desc="Albums">
+    def get_classic_eight_albums(self, period=vars.PERIOD_OVERALL):
+        return self.entity.get_top_albums(period=period, limit=8)
+
+    def get_albums(self, period=vars.PERIOD_OVERALL, limit=10):
+        return self.entity.get_top_albums(period=period, limit=limit)
 
     def get_top_albums(self, limit=10):
-        return self.entity.get_top_albums(vars.PERIOD_OVERALL, limit)
+        return self.entity.get_top_albums(vars.PERIOD_OVERALL, limit=limit)
 
+    def get_top_albums_data(self, limit=10):
+        return [(album.item.title, album.weight) for album in self.entity.get_top_albums(limit=limit)][::-1]
+
+    def get_albums_data(self, period=vars.PERIOD_OVERALL, limit=10):
+        return [(album.item.title, album.weight) for album in self.entity.get_top_albums(period=period, limit=limit)][::-1]
+    # </editor-fold>
+
+    # <editor-fold desc="Tracks">
     def get_top_tracks(self, limit=10):
-        return self.entity.get_top_tracks(vars.PERIOD_OVERALL, limit)
+        return self.entity.get_top_tracks(vars.PERIOD_OVERALL, limit=limit)
+    # </editor-fold>
 
+    # <editor-fold desc="Tags">
     def get_top_tags(self, limit=5):
         artists = self.get_top_artists(limit=5)
         tags = {}
@@ -68,16 +93,14 @@ class UserModel:
 
         return [(k, tags[k]) for k in sorted(tags, key=tags.get, reverse=True)][:limit]
 
-    def get_friends_playcounts(self, limit=10):
+    # </editor-fold>
+
+    # <editor-fold desc="Friends">
+    def get_friends_playcount(self, limit=10):
         friends = scrappers.FriendsScrapper.get_friends_by_username(self.entity.get_name())[:limit]
         data = [(friend, Configuration().lastfm_network.get_user(friend).get_playcount()) for friend in friends]
         return sorted(data, key=lambda x: x[1], reverse=True)
-
-    def get_top_albums_data(self, limit=10):
-        return [(album.item.title, album.weight) for album in self.entity.get_top_albums(limit=limit)][::-1]
-
-    def get_top_artists_data(self, limit=10):
-        return [(artist.item.name, artist.weight) for artist in self.entity.get_top_artists(limit=limit)][::-1]
+    # </editor-fold>
 
 
 class AlbumModel:

@@ -1,4 +1,6 @@
-from visulast.core import vars, models
+from telegram import ReplyKeyboardMarkup
+import re
+from visulast.core import vars, models, scrappers
 
 
 def keyboard_to_regex(keyboard):
@@ -27,5 +29,6 @@ def is_username_set(context):
     return False
 
 
-def friends_to_keyboard(user_model):
-
+def get_friends_keyboard(username):
+    friends = scrappers.FriendsScrapper.get_friends_by_username(username)
+    return ReplyKeyboardMarkup([[friend] for friend in friends])

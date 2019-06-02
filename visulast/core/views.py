@@ -51,7 +51,7 @@ def save_fig(path, fig, clean=True):
     logger.info(f'Saved figure to {path}')
 
 
-def figure_to_image(plot):
+def figure_to_image(fig):
     pass
 
 
