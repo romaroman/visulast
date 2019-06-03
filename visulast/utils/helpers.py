@@ -1,12 +1,13 @@
 # Singleton template for using in Configuration and others classes
 import logging
 import os
-import shapefile as shp
+import shapefile
 
 import warnings
 import functools
 import logging.config
 import yaml
+
 
 _path = os.path.dirname(os.path.abspath(__file__))
 PROJ_PATH = _path[:9 + _path.find('visulast')]
@@ -44,13 +45,6 @@ def deprecated(func):
 
 def extract_countries():
     countries = []
-    for record in shp.Reader(SHAPE_FILE, 'countries').iterRecords():
+    for record in shapefile.Reader(SHAPE_FILE, 'countries').iterRecords():
         countries.append(record['SOVEREIGNT'])
     return countries
-
-
-def is_lastfm_user_real(username):
-    if config.Configuration().lastfm_network.get_user(username).get_library().get_artists(1):
-        return True
-    return False
-

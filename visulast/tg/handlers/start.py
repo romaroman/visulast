@@ -1,7 +1,7 @@
-from telegram import ReplyKeyboardMarkup
+from telegram import ParseMode
 from telegram.ext import ConversationHandler
 
-import visulast.tg.states as states
+from visulast.tg.handlers import states
 from visulast.tg.handlers.general import abort
 from visulast.tg.handlers.visualize import CommandHandler
 
@@ -11,11 +11,15 @@ keyboards = {
 
 
 def start(update, context):
-    # reply_markup = ReplyKeyboardMarkup(keyboard[''], one_time_keyboard=True)
     context.bot.send_message(
         chat_id=update.message.chat_id,
-        text="It's the very beginning of our conversation. We should set up some moments before getting started",
-        # reply_markup=reply_markup
+        text="It's the very beginning of our conversation. We should set up some moments before getting started.",
+    )
+    context.bot.send_message(
+        chat_id=update.message.chat_id,
+        text="Type /authenticate _username_ to set default username. "
+             "Otherwise you won't be able to use main functionality.",
+        parse_mode=ParseMode.MARKDOWN,
     )
     return states.START
 

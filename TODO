@@ -11,30 +11,34 @@ DONE! implement storing cookies for user (or not in bot but somehow)
 DONE! find out how to initialize project
 DONE! support async i/o
 DONE! support multithreading
+DONE! create some visualizations with seaborn or matplotlib or smthing else in notebook
+DONE! revise MVC architecture!!!
+DONE! implement another 5 visualizations (classic eight style, piecharts, barcharts, smthin else)
+DONE! migrate last.fm vars for controllers
+
+FOR ZAPISKA:
+    MONDAY:
+        another 4 vizualizations
+        write unit tests!
+        refactor user dialog
+        write start and configure dialog
+        integrate calendar into custom period choice
+        inline bot options?
 
 
-SATURDAY:
+FUNCTIONALITY:
     HIGH PRIORITY:
-        DONE! create some visualizations with seaborn or matplotlib or smthing else in notebook
-        DONE! revise MVC architecture!!!
-        DONE! implement another 5 visualizations (classic eight style, piecharts, barcharts, smthin else)
-        DONE! migrate last.fm vars for controllers
-
         implement how choice with usage of inline buttons
         add inline options to generated image
-        add additional handler for chat_data intialization (ConversationHandler with /start)
         add parse support to controller for generation
+        store pickle serialization for scrapped data
+        store serialized object path's in database
 
     MEDIUM PRIORITY:
         store some info in sql database
         write migration scripts
         authorize with last.fm token
-        integrate calendar into custom period choice
 
-SUNDAY:
-    HIGH PRIORITY:
-        store pickle serialization for scrapped data
-        store serialized object path's in database
 
 TILL PROTECTION:
     MISC:
@@ -47,7 +51,7 @@ TILL PROTECTION:
     INTEGRATION:
         write setup.py file to generate code as package
         command line usage with numerous parameters
-        write dockerfile without BASEMAP (based on miniconda)
+        write dockerfile
 
     COVERAGE:
         cover code with commentaries

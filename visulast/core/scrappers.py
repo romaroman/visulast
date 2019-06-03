@@ -1,29 +1,29 @@
 import uuid
 import re
-from io import BytesIO, StringIO
+from io import BytesIO
 
 import requests
 from PIL import Image
 from bs4 import BeautifulSoup
 from collections import defaultdict
 
-from urllib.request import urlopen
 import pylast
 import wikipedia as wiki
-import googlemaps as gmaps
-import musicbrainzngs as mbz
+import googlemaps
+import musicbrainzngs
 import numpy as np
+
 from visulast.config import Configuration
 from visulast.utils.helpers import get_logger, extract_countries
 
 legal_countries = extract_countries()
 logger = get_logger(__name__)
-gmaps_client = gmaps.Client(key=Configuration().tokens.google_maps_api)
-mbz.set_useragent(app=Configuration().app_name, version=Configuration().app_version)
+gmaps_client = googlemaps.Client(key=Configuration().tokens.google_maps_api)
+musicbrainzngs.set_useragent(app=Configuration().app_name, version=Configuration().app_version)
 session = uuid.uuid4()
 
 
-class CountryOfArtistScrapper:
+class CountryScrapper:
     def __init__(self, *args, **kwargs):
         super.__init__(*args, **kwargs)
 
@@ -48,7 +48,7 @@ class CountryOfArtistScrapper:
                 if p["terms"][0]["value"] in legal_countries:
                     return p["terms"][0]["value"]
                 for term in p["terms"]:
-                    norm_term = CountryOfArtistScrapper.normalize_with_dictionary(term["value"])
+                    norm_term = CountryScrapper.normalize_with_dictionary(term["value"])
                     if norm_term in legal_countries:
                         return norm_term
 
@@ -62,7 +62,7 @@ class CountryOfArtistScrapper:
                     continue
                 if word[0].isupper():
                     try:
-                        pos_country = CountryOfArtistScrapper.normalize_with_dictionary(word)
+                        pos_country = CountryScrapper.normalize_with_dictionary(word)
                         if pos_country in legal_countries:
                             country_occur[pos_country] += 1
                     except KeyError:
@@ -107,7 +107,7 @@ class CountryOfArtistScrapper:
                 except IndexError:
                     return None
             try:
-                res_country = CountryOfArtistScrapper.normalize_with_dictionary(origin.text.split(',')[-1][1:])
+                res_country = CountryScrapper.normalize_with_dictionary(origin.text.split(',')[-1][1:])
             except AttributeError:
                 return summary_parser(page.summary)
             if res_country in legal_countries:
@@ -130,10 +130,10 @@ class CountryOfArtistScrapper:
                 facts = facts[:facts.find('(') - 1]
             locations = facts.strip(',')
             for l in locations:
-                nl = CountryOfArtistScrapper.normalize_with_dictionary(l)
+                nl = CountryScrapper.normalize_with_dictionary(l)
                 if nl in legal_countries:
                     return nl
-            return CountryOfArtistScrapper.normalize_with_gmaps(facts)
+            return CountryScrapper.normalize_with_gmaps(facts)
         except (AttributeError, KeyError):
             summary = artist.get_bio_summary()
             country_occur = defaultdict(int)
@@ -143,7 +143,7 @@ class CountryOfArtistScrapper:
                     continue
                 if word[0].isupper():
                     try:
-                        possible_country = CountryOfArtistScrapper.normalize_with_dictionary(word)
+                        possible_country = CountryScrapper.normalize_with_dictionary(word)
                         if possible_country in legal_countries:
                             country_occur[possible_country] += 1
                     except KeyError:
@@ -155,17 +155,17 @@ class CountryOfArtistScrapper:
         mbid = lastfm_artist.get_mbid()
         if mbid:
             try:
-                mb_art = mbz.get_artist_by_id(id=mbid)
+                mb_art = musicbrainzngs.get_artist_by_id(id=mbid)
                 country = mb_art['artist']['area']['name']
                 if country not in legal_countries:
-                    country = CountryOfArtistScrapper.normalize_with_dictionary(country)
+                    country = CountryScrapper.normalize_with_dictionary(country)
                 if country not in legal_countries:
-                    country = CountryOfArtistScrapper.normalize_with_gmaps(country)
+                    country = CountryScrapper.normalize_with_gmaps(country)
                 return country
             except KeyError:
                 pass
         else:
-            res = mbz.search_artists(query=lastfm_artist.name)
+            res = musicbrainzngs.search_artists(query=lastfm_artist.name)
             if res:
                 for entry in res['artist-list']:
                     if entry['name'] and entry['name'].lower() == lastfm_artist.name.lower():
@@ -177,16 +177,16 @@ class CountryOfArtistScrapper:
 
     @staticmethod
     def get_one(lastfm_artist):
-        country = CountryOfArtistScrapper.get_from_musicbrainz(lastfm_artist)
+        country = CountryScrapper.get_from_musicbrainz(lastfm_artist)
         if country not in legal_countries:
-            country = CountryOfArtistScrapper.get_from_lastfm_summary(lastfm_artist)
+            country = CountryScrapper.get_from_lastfm_summary(lastfm_artist)
         logger.info(f"Artist:\t{lastfm_artist.name}\tCountry:{country}\n")
         return country
 
     @staticmethod
     def get_one_by_string(artist_name):
         lastfm_artist = Configuration().lastfm_network.get_artist(artist_name=artist_name)
-        return CountryOfArtistScrapper.get_one(lastfm_artist)
+        return CountryScrapper.get_one(lastfm_artist)
 
 
 class ImageScrapper(object):
@@ -223,9 +223,4 @@ class FriendsScrapper(object):
         req = requests.get(f'https://www.last.fm/user/{username}/following')
         soup = BeautifulSoup(req.text, features="lxml")
         usernames = soup.findAll("a", {"class": target_class})
-        return [user.contents[0] for user in usernames]
-
-
-if __name__ == '__main__':
-    # ImageScrapper.get_image_by_entity()
-    print(FriendsScrapper.get_friends_by_username('niedego'))
+        return [user.contents[0] for user in usernames][::-1]

@@ -1,7 +1,6 @@
-from telegram import ReplyKeyboardMarkup
 from telegram.ext import ConversationHandler, CommandHandler
 
-import visulast.tg.states as states
+from visulast.tg.handlers import states
 from visulast.tg.handlers.general import abort
 
 keyboards = {

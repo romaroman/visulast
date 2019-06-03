@@ -1,5 +1,8 @@
-albums - Visualize specific album
-visualize - Start conversation with bot
+user - Visualize user's library
+artist - Visualize specific artist data
+album - Visualize specific album information
+tag - Visualize specific tag data
+track - Visualize specific track summary
 
 abort - Cancel current operation
 cancel - Set conversation state to beginning

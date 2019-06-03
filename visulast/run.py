@@ -1,4 +1,4 @@
-import visulast.tg.bot as bot
+from visulast.tg import bot
 
 
 if __name__ == '__main__':
