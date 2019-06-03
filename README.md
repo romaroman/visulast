@@ -1,43 +1,30 @@
-=================
-Table of contents
-=================
+## Table of contents
 
-- `Introduction`
+- Introduction
 
-- `Requirements`
+- Requirements
 
-- `Installing`
+- Setup
 
-- `Getting started`
+- Learning by example
 
-  #. `Configuration`
+- Logging
 
-  #. `Learning by example`
+- Getting help
 
-  #. `Logging`
-
-  #. `Documentation`
-
-- `Getting help`_
-
-- `Contributing`_
-
-- `License`_
+- License
 
  
-============
-Introduction
-============
 
-This bot provides user-friendly expirience for visualization of <https://last.fm/> library
-It's compatible with Python versions 3.3+, Anaconda and `PyPy <http://pypy.org/>`_.
+## Introduction
+
+This bot provides user-friendly experience for visualization of [last.fm library](https://last.fm/).
+It's compatible with Python versions 3.3+, Anaconda and [PyPy](http://pypy.org/).
 
 In addition to the pure API implementation, this library features a number of high-level classes to
 make the maintaining easy and straightforward.
- 
-==========
-Requirements
-==========
+
+## Requirements
 
 All needed packages are listed in `requirements.txt` or in `environment.yml` in case if you use Anaconda.
 
@@ -45,43 +32,39 @@ These requirements can be done with next commands:
 
 In case of pure Python:
 
-.. code:: shell
+```bash
+$ make install_reqs
+```
 
-    $ make install_reqs
-    
 or with command:
 
-.. code:: shell
+```bash
+$ pip install -r requirements.txt
+```
 
-    $ pip install -r requirements.txt
-    
 or with command if you use Anaconda:
 
-.. code:: shell
-
-    $ conda env create -f environment.yml
+```bash
+$ conda env create -f environment.yml
+```
  
-===============
-Setup
-===============
+## Setup
 
 With next commands you clone repository, installing requirements, configuring entries in json, installing package to system and running bot.
 
-.. code:: shell
+```bash
+$ git clone https://gitlab.com/romaroman/visulast
 
-    $ git clone https://gitlab.com/romaroman/visulast
-    
-    $ pip install -r requirements.txt
-    
-    $ cp config.example.json config.json
-    
-    $ python setup.py install
-    
-    $ python visulast/run.py
+$ pip install -r requirements.txt
 
--------------------
-Learning by example
--------------------
+$ cp config.example.json config.json
+
+$ python setup.py install
+
+$ python visulast/run.py
+```
+
+## Learning by example
 
 We believe that the best way to learn and understand this simple package is by example. So here
 are some examples for you to review. Even if it's not your approach for learning, please take a
@@ -89,40 +72,36 @@ look at ``samplebot.py``, it is de facto the base for most of the bots out there
 the code for these examples are released to the public domain, so you can start by grabbing the
 code and building on top of it.
 
--------
-Logging
--------
+## Logging
 
 This library uses the ``logging`` module. To set up logging to standard output, put:
 
-.. code:: python
-
-    import logging
-    logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
+```python
+import logging
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+```
+    
 at the beginning of your script.
 
 You can also use logs in your application by calling ``logging.getLogger()`` and setting the log level you want:
 
-.. code:: python
-
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+```python
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+```
 
 If you want DEBUG logs instead:
 
-.. code:: python
+```python
+logger.setLevel(logging.DEBUG)
+```
 
-    logger.setLevel(logging.DEBUG)
-
-============
-Getting help
-============
+## Getting help
 
 You can get help in several ways:
 
-1. Typing /help in `@visulast_bot` dialog.
+1. Typing */help* in `@visulast_bot` dialog.
 
 2. Reading documentation and commentaries to code.
 
@@ -132,8 +111,8 @@ You can get help in several ways:
 
 5. Also by telegram nickname is `@plumberphd`
 
-=======
-License
-=======
+## License
 
-You may copy, distribute and modify the software provided that modifications are described and licensed for free under `LGPL-3 <https://www.gnu.org/licenses/lgpl-3.0.html>`_. Derivatives works (including modifications or anything statically linked to the library) can only be redistributed under LGPL-3, but applications that use the library don't have to be.
+You may copy, distribute and modify the software provided that modifications are described and licensed for free under [LGPL-3](https://www.gnu.org/licenses/lgpl-3.0.html). 
+
+Derivatives works (including modifications or anything statically linked to the library) can only be redistributed under LGPL-3, but applications that use the library don't have to be.
