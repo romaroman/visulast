@@ -1,10 +1,9 @@
 import re
-from visulast.tg import states
 from visulast.tg import helpers
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, ParseMode, ChatAction
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, ParseMode
 from telegram.ext import ConversationHandler, MessageHandler, Filters, CommandHandler
 from visulast.core import controllers, models
-from visulast.tg.handlers import commons
+from visulast.tg.handlers import commons, states
 from visulast.tg.handlers.general import abort
 
 keyboards = {

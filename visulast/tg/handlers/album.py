@@ -1,11 +1,10 @@
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, ParseMode
 from telegram.ext import ConversationHandler, MessageHandler, Filters, CommandHandler
 
-from visulast.core import models, controllers, scrappers, tools
+from visulast.core import models, controllers, tools
 from visulast.tg.handlers.general import abort
-from visulast.tg import states, helpers
-from visulast.tg.handlers import commons
-
+from visulast.tg import helpers
+from visulast.tg.handlers import commons, states
 
 keyboards = {
     'decision': [['Global', 'My library', 'Specific user']],

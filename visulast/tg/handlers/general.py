@@ -2,7 +2,7 @@ from telegram import ReplyKeyboardRemove, ParseMode
 from telegram.ext import CommandHandler
 
 from visulast.utils.helpers import get_logger
-from visulast.tg import states
+from visulast.tg.handlers import states
 from visulast.config import Configuration
 from visulast.core import tools
 
@@ -19,8 +19,6 @@ def abort(update, context):
 
 
 def clean(update, context):
-    if context.user_data:
-        del context.user_data
     context.user_data.clear()
     update.message.reply_text("Your data is wiped")
 
@@ -88,9 +86,9 @@ def cancel(update, context):
 
 
 def report(update, context):
-    update.message.reply_text("Your report message was delivered to maintainer")
+    update.message.reply_text("Your report message was delivered to maintainer. Thanks for your help!")
     user_link = f'[{update.message.chat.username}](tg://user?id={update.message.chat.id})'
-    message = f"From {user_link} was reported _{''.join(context.args)}_"
+    message = f"From {user_link} was reported: \n _{''.join(context.args)}_"
     context.bot.send_message(chat_id=Configuration().developerTelegramID, text=message, parse_mode=ParseMode.MARKDOWN)
 
 

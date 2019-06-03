@@ -14,7 +14,6 @@ def attach_handlers(dispatcher):
     hs = []
     hs.extend(handlers.general_handlers)
     hs.extend(handlers.calendar_handlers)
-    hs.extend(handlers.visualize_handlers)
     hs.extend(handlers.start_handlers)
     hs.extend(handlers.configure_handlers)
     hs.extend(handlers.album_handlers)
