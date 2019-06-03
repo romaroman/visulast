@@ -61,8 +61,26 @@ def authenticate(update, context):
 
 
 def get_help(update, context):
-    print(context.chat_data)
-    raise NotImplemented
+    update.message.reply_text("""
+/user - Visualize user's library
+/artist - Visualize specific artist data
+/album - Visualize specific album information
+/tag - Visualize specific tag data
+/track - Visualize specific track summary
+
+/abort - Cancel current operation
+/cancel - Set conversation state to beginning
+
+/help - List all commands with theirs descriptions
+/faq - Find out how to use this bot
+
+/clean - Wipe out ALL data associated with your Telegram ID
+/authenticate - Set your last.fm username without authorization
+/authorize - Authenticate with last.fm website
+
+/report - Send a bug report with maintainer
+/donate - Share some money with developer
+    """)
 
 
 def cancel(update, context):
@@ -71,7 +89,9 @@ def cancel(update, context):
 
 def report(update, context):
     update.message.reply_text("Your report message was delivered to maintainer")
-    context.bot.send_message(chat_id=Configuration().developerTelegramID, text=update.message.text)
+    user_link = f'[{update.message.chat.username}](tg://user?id={update.message.chat.id})'
+    message = f"From {user_link} was reported _{''.join(context.args)}_"
+    context.bot.send_message(chat_id=Configuration().developerTelegramID, text=message, parse_mode=ParseMode.MARKDOWN)
 
 
 def donate(update, context):

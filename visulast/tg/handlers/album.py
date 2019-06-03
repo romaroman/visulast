@@ -1,20 +1,20 @@
-from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove, ParseMode
-from telegram.ext import ConversationHandler, MessageHandler, Filters, CallbackQueryHandler, CommandHandler
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, ParseMode
+from telegram.ext import ConversationHandler, MessageHandler, Filters, CommandHandler
 
-from visulast.core import tools
-from visulast.core import models, controllers, scrappers
+from visulast.core import models, controllers, scrappers, tools
 from visulast.tg.handlers.general import abort
-from visulast.tg import states
-from visulast.tg import helpers
+from visulast.tg import states, helpers
+from visulast.tg.handlers import commons
 
 
 keyboards = {
-    'user_decision': [['Global', 'My library', 'Specific user']],
-    'entity_selection': [['Tracks', 'Info']],
-    'representation': [['Pie chart', 'Bar chart']]
+    'decision': [['Global', 'My library', 'Specific user']],
+    'subject': [['Tracks', 'Info']],
+    'representation': [['Pie graph', 'Bar graph']]
 }
 
 ALBUM_MODEL = None
+ALBUM_CONTROLLER = None
 
 
 def album(update, context):
@@ -47,7 +47,7 @@ def artist_name_response(update, context):
         return states.END
 
     context.user_data['album']['artist_name'] = artist_name
-    keyboard = [[album.item.title] for album in artist.get_albums(limit=10)]
+    keyboard = [[album.item.title] for album in artist.get_albums(limit=15)]
 
     context.bot.send_message(
         chat_id=update.message.chat_id,
@@ -59,7 +59,7 @@ def artist_name_response(update, context):
 
 
 def album_title_response(update, context):
-    global ALBUM_MODEL
+    global ALBUM_MODEL, ALBUM_CONTROLLER
     title = update.message.text
 
     if not tools.does_album_exist(context.user_data['album']['artist_name'], title):
@@ -67,6 +67,7 @@ def album_title_response(update, context):
         return states.END
 
     ALBUM_MODEL = models.AlbumModel(context.user_data['album']['artist_name'], title)
+    ALBUM_CONTROLLER = controllers.AlbumController(ALBUM_MODEL)
     context.user_data['album']['album_title'] = title
 
     context.bot.send_message(
@@ -74,7 +75,6 @@ def album_title_response(update, context):
         text='Should it be global stats, related to your username or other user?',
         reply_markup=ReplyKeyboardMarkup(keyboards['user_decision'])
     )
-
     return states.ALBUM_INFO_SOURCE_DECISION
 
 
@@ -96,15 +96,17 @@ def info_source_decision_response(update, context):
         text="Choose tracks or info to provide",
         reply_markup=ReplyKeyboardMarkup(keyboards['entity_selection'])
     )
-    return states.ALBUM_ENTITY_SELECTION
+    return states.ALBUM_SUBJECT_SELECTION
 
 
 def specific_username_response(update, context):
     username = update.message.text
 
-    if tools.does_user_exist(username):
-        context.bot.send_message("Such user doesn't exist")
-        return states.END
+    if not tools.does_user_exist(username):
+        context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text="Such user doesn't exist, try again",
+        )
 
     context.user_data['album']['source'] = username
 
@@ -113,26 +115,25 @@ def specific_username_response(update, context):
         text="Choose tracks or info to provide",
         reply_markup=ReplyKeyboardMarkup(keyboards['entity_selection'])
     )
-    return states.ALBUM_ENTITY_SELECTION
+    return states.ALBUM_SUBJECT_SELECTION
 
 
-def entity_selection_response(update, context):
+def subject_selection_response(update, context):
     global ALBUM_MODEL
     entity = update.message.text
-    context.user_data['album']['entity'] = entity
+    context.user_data['album']['subject'] = entity
 
     if entity == 'Tracks':
         context.bot.send_message(
             chat_id=update.message.chat_id,
-            text="Select the chart type of tracks",
+            text="Select the graph type of tracks",
             reply_markup=ReplyKeyboardMarkup(keyboards['representation'])
         )
         return states.ALBUM_REPRESENTATION_SELECTION
     else:
-        reply_text = ALBUM_MODEL.get_info()
         context.bot.send_message(
             chat_id=update.message.chat_id,
-            text=reply_text,
+            text=ALBUM_MODEL.get_info(),
             reply_markup=ReplyKeyboardRemove()
         )
         return states.END
@@ -140,18 +141,9 @@ def entity_selection_response(update, context):
 
 def representation_selection_response(update, context):
     representation = update.message.text
-    controller = controllers.AlbumController(ALBUM_MODEL)
-    if representation == 'Bar chart':
-        image = controller.tracks_bar_chart()
-    else:
-        image = controller.tracks_pie_chart()
-
-    context.bot.send_photo(
-        chat_id=update.message.chat_id,
-        caption=f'Enjoy',
-        photo=open(image, 'rb'),
-        reply_markup=ReplyKeyboardRemove()
-    )
+    context.user_data['album']['representation'] = representation
+    global ALBUM_CONTROLLER
+    commons.finish_dialog(update, context, ALBUM_CONTROLLER)
     return states.END
 
 
@@ -169,19 +161,18 @@ HANDLERS = [
             ],
             states.ALBUM_INFO_SOURCE_DECISION: [
                 MessageHandler(
-                    Filters.regex(helpers.keyboard_to_regex(keyboards['user_decision'])),
+                    Filters.regex(helpers.keyboard_to_regex(keyboards['decision'])),
                     info_source_decision_response
                 ),
             ],
             states.ALBUM_SPECIFIC_USERNAME_SELECTION: [
                 MessageHandler(Filters.text, specific_username_response),
             ],
-            states.ALBUM_ENTITY_SELECTION: [
+            states.ALBUM_SUBJECT_SELECTION: [
                 MessageHandler(
-                    Filters.regex(helpers.keyboard_to_regex(keyboards['entity_selection'])),
-                    entity_selection_response,
+                    Filters.regex(helpers.keyboard_to_regex(keyboards['subject'])),
+                    subject_selection_response,
                 ),
-
             ],
             states.ALBUM_REPRESENTATION_SELECTION: [
                 MessageHandler(

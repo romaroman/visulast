@@ -105,7 +105,7 @@ class GeneralView:
         return filename
 
     @staticmethod
-    def draw_classic_eight_chart(data):
+    def draw_classic_eight_graph(data):
         labels = []
         images = []
         for entity in data:

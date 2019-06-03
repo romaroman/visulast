@@ -19,3 +19,7 @@ def does_tag_exist(name):
 
 def does_track_exist(artist_name, track_title):
     return True if models.TrackModel(artist_name, track_title) else False
+
+
+if __name__ == '__main__':
+    print(does_user_exist('Florian_y'))

@@ -16,8 +16,8 @@ class TestGeneralView(unittest.TestCase):
     def test_draw_stacked_bar_graph(self):
         self.assertIsNotNone(views.GeneralView.draw_stacked_bar_graph([], ''))
 
-    def test_draw_classic_eight_chart(self):
-        self.assertIsNotNone(views.GeneralView.draw_classic_eight_chart([]))
+    def test_draw_classic_eight_graph(self):
+        self.assertIsNotNone(views.GeneralView.draw_classic_eight_graph([]))
 
     def test_draw_world_map(self):
         self.assertIsNotNone(views.GeneralView.draw_world_map({'Russia': 2}))
