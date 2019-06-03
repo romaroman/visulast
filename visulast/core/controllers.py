@@ -61,7 +61,7 @@ class UserController:
         return GeneralView.draw_horizontal_bar_graph(self.model.get_friends_playcount(limit=limit), title=title)
     # </editor-fold>
 
-    def process(self, subject, period, amount, representation, *args, **kwargs):
+    def process(self, subject, representation, period=vars.PERIOD_OVERALL, amount=10,  *args, **kwargs):
         if subject == 'Artists':
             if representation == 'Bar diagram':
                 return self.artists_bar_chart(period=period, limit=amount)
@@ -69,8 +69,16 @@ class UserController:
                 return self.artists_pie_chart(period=period, limit=amount)
             elif representation == 'World map':
                 return self.artists_playcount_world_map(limit=amount)
+            elif representation == 'Stack diagram':
+                return
+            elif representation == 'Heat map':
+                return
             elif representation == 'Classic eight':
                 return self.artists_classic_eight(period=period)
+            elif representation == '5x5 covers':
+                return
+            elif representation == '4x4 covers':
+                return
         elif subject == 'Albums':
             if representation == 'Bar diagram':
                 return self.albums_bar_chart(period=period, limit=amount)
@@ -109,5 +117,7 @@ class AlbumController:
 
 
 if __name__ == '__main__':
-    controller = UserController(models.UserModel('niedego'))
-    controller.process('Artists', 'overall', 30, 'Bar chart')
+    model = models.UserModel('niedego')
+    controller = UserController(model)
+    controller.artists_classic_eight(period=vars.PERIOD_OVERALL)
+    # controller.process('Artists', 'overall', 30, 'Bar chart')

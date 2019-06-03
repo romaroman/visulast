@@ -14,7 +14,7 @@ class UserModel:
         instance = super(UserModel, cls).__new__(cls)
         instance.__init__(lastfm_name)
         entity = Configuration().lastfm_network.get_user(username=lastfm_name)
-        if entity.get_playcount():
+        if entity.get_url():
             instance.entity = entity
             return instance
         else:
