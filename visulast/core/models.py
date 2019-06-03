@@ -28,7 +28,7 @@ class UserModel:
         """
         countries = {}
         for i in self.entity.get_top_artists(limit=limit):
-            country = scrappers.CountryOfArtistScrapper.get_one(i.item)
+            country = scrappers.CountryScrapper.get_one(i.item)
             v = 1
             if what == 's':
                 v = int(i.weight)
@@ -163,7 +163,7 @@ class TagModel:
         instance = super(TagModel, cls).__new__(cls)
         instance.__init__(name)
         entity = Configuration().lastfm_network.get_tag(name=name)
-        if entity.get_mbid():
+        if entity.get_url():
             instance.entity = entity
             return instance
         else:

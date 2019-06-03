@@ -1,7 +1,7 @@
 import numpy as np
 from datetime import datetime
 import os
-
+import random
 import pylast
 import shapefile
 import matplotlib.pyplot as plt
@@ -138,7 +138,7 @@ class GeneralView:
 
     @staticmethod
     def draw_pie_graph(data, title):
-
+        random.shuffle(data)
         labels = [shorten_label(t[0]) for t in data]
         weights = [t[1] for t in data]
         # explode = (0.1, 0, 0, 0, 0, 0, 0, 0)
@@ -147,7 +147,7 @@ class GeneralView:
         _, _, texts = ax.pie(weights, labels=labels, autopct='%1.1f%%', startangle=50)
         ax.axis('equal')
         plt.setp(texts, size=8)
-        ax.set_title('Pie chart weight representation of ' + title)
+        ax.set_title('Pie graph weight representation of ' + title)
 
         filename = f"{images_directory}/pie/{title}_{get_timestamp()}.png"
         save_fig(filename, fig, clean=False)
@@ -155,6 +155,7 @@ class GeneralView:
 
     @staticmethod
     def draw_horizontal_bar_graph(data, title):
+
         labels = [shorten_label(d[0]) for d in data]
         weights = [d[1] for d in data]
 
@@ -175,7 +176,7 @@ class GeneralView:
             spine.set_visible(False)
 
         ax.set_xlabel('Weight or playcount')
-        ax.set_title('Bar chart weight representation of ' + title)
+        ax.set_title('Bar graph weight representation of ' + title)
 
         filename = f"{images_directory}/horizontal_bar/{title}_{get_timestamp()}.png"
         save_fig(filename, fig, clean=False)

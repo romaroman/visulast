@@ -26,7 +26,18 @@ USER_MODEL = None
 USER_CONTROLLER = None
 
 
-def finish_dialog(update, context, image):
+def finish_dialog(update, context):
+    context.bot.send_chat_action(chat_id=update.message.chat_id, action=ChatAction.UPLOAD_PHOTO)
+    context.bot.send_message(
+        chat_id=update.message.chat_id,
+        text='Wait until I generate image...',
+    )
+    image = USER_CONTROLLER.process(
+        subject=context.user_data['user']['subject'],
+        representation=context.user_data['user']['representation'],
+        period=context.user_data['user']['period'],
+        amount=context.user_data['user']['amount'],
+    )
     if image is None:
         context.bot.send_message(
             chat_id=update.message.chat_id,
@@ -55,6 +66,7 @@ def user(update, context):
         return states.END
 
     context.user_data['user'] = {}
+    context.user_data['user']['amount'] = 0
     context.bot.send_message(
         chat_id=update.message.chat_id,
         text="Choose where from should I gather data",
@@ -144,13 +156,7 @@ def representation_selection_response(update, context):
     representation = update.message.text
     context.user_data['user']['representation'] = representation
     if representation in ['5x5 covers', '4x4 covers', 'Classic eight']:
-        image = USER_CONTROLLER.process(
-            subject=context.user_data['user']['subject'],
-            period=context.user_data['user']['period'],
-            representation=context.user_data['user']['representation'],
-        )
-
-        finish_dialog(update, context, image)
+        finish_dialog(update, context)
         return states.END
 
     context.bot.send_message(
@@ -165,19 +171,7 @@ def amount_selection_response(update, context):
     amount = update.message.text
     context.user_data['user']['amount'] = int(re.sub("\D", "", amount))
 
-    context.bot.send_chat_action(chat_id=update.message.chat_id, action=ChatAction.UPLOAD_PHOTO)
-    context.bot.send_message(
-        chat_id=update.message.chat_id,
-        text='Wait until I generate image...',
-    )
-
-    image = USER_CONTROLLER.process(
-        subject=context.user_data['user']['subject'],
-        representation=context.user_data['user']['representation'],
-        period=context.user_data['user']['period'],
-        amount=context.user_data['user']['amount'],
-    )
-    finish_dialog(update, context, image)
+    finish_dialog(update, context)
     return states.END
 
 

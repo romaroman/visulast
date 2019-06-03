@@ -23,7 +23,7 @@ musicbrainzngs.set_useragent(app=Configuration().app_name, version=Configuration
 session = uuid.uuid4()
 
 
-class CountryOfArtistScrapper:
+class CountryScrapper:
     def __init__(self, *args, **kwargs):
         super.__init__(*args, **kwargs)
 
@@ -48,7 +48,7 @@ class CountryOfArtistScrapper:
                 if p["terms"][0]["value"] in legal_countries:
                     return p["terms"][0]["value"]
                 for term in p["terms"]:
-                    norm_term = CountryOfArtistScrapper.normalize_with_dictionary(term["value"])
+                    norm_term = CountryScrapper.normalize_with_dictionary(term["value"])
                     if norm_term in legal_countries:
                         return norm_term
 
@@ -62,7 +62,7 @@ class CountryOfArtistScrapper:
                     continue
                 if word[0].isupper():
                     try:
-                        pos_country = CountryOfArtistScrapper.normalize_with_dictionary(word)
+                        pos_country = CountryScrapper.normalize_with_dictionary(word)
                         if pos_country in legal_countries:
                             country_occur[pos_country] += 1
                     except KeyError:
@@ -107,7 +107,7 @@ class CountryOfArtistScrapper:
                 except IndexError:
                     return None
             try:
-                res_country = CountryOfArtistScrapper.normalize_with_dictionary(origin.text.split(',')[-1][1:])
+                res_country = CountryScrapper.normalize_with_dictionary(origin.text.split(',')[-1][1:])
             except AttributeError:
                 return summary_parser(page.summary)
             if res_country in legal_countries:
@@ -130,10 +130,10 @@ class CountryOfArtistScrapper:
                 facts = facts[:facts.find('(') - 1]
             locations = facts.strip(',')
             for l in locations:
-                nl = CountryOfArtistScrapper.normalize_with_dictionary(l)
+                nl = CountryScrapper.normalize_with_dictionary(l)
                 if nl in legal_countries:
                     return nl
-            return CountryOfArtistScrapper.normalize_with_gmaps(facts)
+            return CountryScrapper.normalize_with_gmaps(facts)
         except (AttributeError, KeyError):
             summary = artist.get_bio_summary()
             country_occur = defaultdict(int)
@@ -143,7 +143,7 @@ class CountryOfArtistScrapper:
                     continue
                 if word[0].isupper():
                     try:
-                        possible_country = CountryOfArtistScrapper.normalize_with_dictionary(word)
+                        possible_country = CountryScrapper.normalize_with_dictionary(word)
                         if possible_country in legal_countries:
                             country_occur[possible_country] += 1
                     except KeyError:
@@ -158,9 +158,9 @@ class CountryOfArtistScrapper:
                 mb_art = musicbrainzngs.get_artist_by_id(id=mbid)
                 country = mb_art['artist']['area']['name']
                 if country not in legal_countries:
-                    country = CountryOfArtistScrapper.normalize_with_dictionary(country)
+                    country = CountryScrapper.normalize_with_dictionary(country)
                 if country not in legal_countries:
-                    country = CountryOfArtistScrapper.normalize_with_gmaps(country)
+                    country = CountryScrapper.normalize_with_gmaps(country)
                 return country
             except KeyError:
                 pass
@@ -177,16 +177,16 @@ class CountryOfArtistScrapper:
 
     @staticmethod
     def get_one(lastfm_artist):
-        country = CountryOfArtistScrapper.get_from_musicbrainz(lastfm_artist)
+        country = CountryScrapper.get_from_musicbrainz(lastfm_artist)
         if country not in legal_countries:
-            country = CountryOfArtistScrapper.get_from_lastfm_summary(lastfm_artist)
+            country = CountryScrapper.get_from_lastfm_summary(lastfm_artist)
         logger.info(f"Artist:\t{lastfm_artist.name}\tCountry:{country}\n")
         return country
 
     @staticmethod
     def get_one_by_string(artist_name):
         lastfm_artist = Configuration().lastfm_network.get_artist(artist_name=artist_name)
-        return CountryOfArtistScrapper.get_one(lastfm_artist)
+        return CountryScrapper.get_one(lastfm_artist)
 
 
 class ImageScrapper(object):
