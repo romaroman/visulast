@@ -311,6 +311,9 @@ class GeneralView:
         # ax.grid(which="minor", color="b", linestyle='-', linewidth=3)
         ax.tick_params(which="minor", bottom=False, left=False)
         plt.show()
+        filename = f"{images_directory}/heat_map/_{get_timestamp()}.png"
+        save_fig(filename, fig, clean=False)
+        return filename
         return im, cbar
 
     @staticmethod
