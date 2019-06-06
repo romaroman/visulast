@@ -3,7 +3,7 @@ from visulast.core import scrappers
 from visulast.config import Configuration
 
 
-class TestUserModel(unittest.TestCase):
+class TestScrappers(unittest.TestCase):
 
     def test_country_scrapper_get_from_lastfm_summary(self):
         artist = Configuration().lastfm_network.get_artist("DJ Shadow")
