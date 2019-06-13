@@ -1,3 +1,5 @@
+import pylast
+
 from visulast.core import scrappers
 from visulast.utils.helpers import get_logger
 from visulast.config import Configuration
@@ -14,10 +16,11 @@ class UserModel:
         instance = super(UserModel, cls).__new__(cls)
         instance.__init__(lastfm_name)
         entity = Configuration().lastfm_network.get_user(username=lastfm_name)
-        if entity.get_url():
+        try:
+            entity.get_country()
             instance.entity = entity
             return instance
-        else:
+        except pylast.WSError:
             return None
 
     def get_for_all_countries(self, what='s', limit=5):
@@ -117,10 +120,11 @@ class AlbumModel:
         instance = super(AlbumModel, cls).__new__(cls)
         instance.__init__(artist_name, title)
         entity = Configuration().lastfm_network.get_album(artist=artist_name, title=title)
-        if entity.get_mbid():
+        try:
+            entity.get_mbid()
             instance.entity = entity
             return instance
-        else:
+        except pylast.WSError:
             return None
 
     def get_tracks_userplaycount(self, username):
@@ -145,10 +149,11 @@ class ArtistModel:
         instance = super(ArtistModel, cls).__new__(cls)
         instance.__init__(name)
         entity = Configuration().lastfm_network.get_artist(artist_name=name)
-        if entity.get_mbid():
+        try:
+            entity.get_mbid()
             instance.entity = entity
             return instance
-        else:
+        except pylast.WSError:
             return None
 
     def get_albums(self, limit=5):

@@ -7,8 +7,8 @@ from visulast.tg import helpers
 from visulast.tg.handlers import commons, states
 
 keyboards = {
-    'decision': [['Global', 'My library', 'Specific user']],
-    'subject': [['Tracks', 'Info']],
+    'user_decision': [['Global', 'My library', 'Specific user']],
+    'entity_selection': [['Tracks', 'Info']],
     'representation': [['Pie graph', 'Bar graph']]
 }
 
@@ -42,19 +42,21 @@ def artist_name_response(update, context):
     artist = models.ArtistModel(artist_name)
 
     if not artist:
-        context.bot.send_message("Such artist is not present at last.fm or you have misspelled")
-        return states.END
+        context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text="Such artist is not present at last.fm or you have misspelled.\nTry again or type /abort"
+        )
+    else:
+        context.user_data['album']['artist_name'] = artist_name
+        keyboard = [[album.item.title] for album in artist.get_albums(limit=15)]
 
-    context.user_data['album']['artist_name'] = artist_name
-    keyboard = [[album.item.title] for album in artist.get_albums(limit=15)]
+        context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text='Now type album title or select among presented in keyboard',
+            reply_markup=ReplyKeyboardMarkup(keyboard)
+        )
 
-    context.bot.send_message(
-        chat_id=update.message.chat_id,
-        text='Now type album title or select among presented in keyboard',
-        reply_markup=ReplyKeyboardMarkup(keyboard)
-    )
-
-    return states.ALBUM_TITLE_TYPING
+        return states.ALBUM_TITLE_TYPING
 
 
 def album_title_response(update, context):
@@ -62,19 +64,21 @@ def album_title_response(update, context):
     title = update.message.text
 
     if not tools.does_album_exist(context.user_data['album']['artist_name'], title):
-        context.bot.send_message("Such album is not present at last.fm library or you have misspelled")
-        return states.END
+        context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text="Such album is not present at last.fm library or you have misspelled.\nTry again or type /abort"
+        )
+    else:
+        ALBUM_MODEL = models.AlbumModel(context.user_data['album']['artist_name'], title)
+        ALBUM_CONTROLLER = controllers.AlbumController(ALBUM_MODEL)
+        context.user_data['album']['album_title'] = title
 
-    ALBUM_MODEL = models.AlbumModel(context.user_data['album']['artist_name'], title)
-    ALBUM_CONTROLLER = controllers.AlbumController(ALBUM_MODEL)
-    context.user_data['album']['album_title'] = title
-
-    context.bot.send_message(
-        chat_id=update.message.chat_id,
-        text='Should it be global stats, related to your username or other user?',
-        reply_markup=ReplyKeyboardMarkup(keyboards['user_decision'])
-    )
-    return states.ALBUM_INFO_SOURCE_DECISION
+        context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text='Should it be global stats, related to your username or other user?',
+            reply_markup=ReplyKeyboardMarkup(keyboards['user_decision'])
+        )
+        return states.ALBUM_INFO_SOURCE_DECISION
 
 
 def info_source_decision_response(update, context):
@@ -82,7 +86,6 @@ def info_source_decision_response(update, context):
     context.user_data['album']['source'] = decision
 
     if decision == 'Specific user':
-
         context.bot.send_message(
             chat_id=update.message.chat_id,
             text='Type username or choose among your friends',
@@ -104,23 +107,23 @@ def specific_username_response(update, context):
     if not tools.does_user_exist(username):
         context.bot.send_message(
             chat_id=update.message.chat_id,
-            text="Such user doesn't exist, try again",
+            text="Such user doesn't exist.\nTry again or type /abort",
         )
+    else:
+        context.user_data['album']['source'] = username
 
-    context.user_data['album']['source'] = username
-
-    context.bot.send_message(
-        chat_id=update.message.chat_id,
-        text="Choose tracks or info to provide",
-        reply_markup=ReplyKeyboardMarkup(keyboards['entity_selection'])
-    )
-    return states.ALBUM_SUBJECT_SELECTION
+        context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text="Choose tracks or info to provide",
+            reply_markup=ReplyKeyboardMarkup(keyboards['entity_selection'])
+        )
+        return states.ALBUM_SUBJECT_SELECTION
 
 
 def subject_selection_response(update, context):
     global ALBUM_MODEL
     entity = update.message.text
-    context.user_data['album']['subject'] = entity
+    context.user_data['album']['entity'] = entity
 
     if entity == 'Tracks':
         context.bot.send_message(
@@ -160,7 +163,7 @@ HANDLERS = [
             ],
             states.ALBUM_INFO_SOURCE_DECISION: [
                 MessageHandler(
-                    Filters.regex(helpers.keyboard_to_regex(keyboards['decision'])),
+                    Filters.regex(helpers.keyboard_to_regex(keyboards['user_decision'])),
                     info_source_decision_response
                 ),
             ],
@@ -169,7 +172,7 @@ HANDLERS = [
             ],
             states.ALBUM_SUBJECT_SELECTION: [
                 MessageHandler(
-                    Filters.regex(helpers.keyboard_to_regex(keyboards['subject'])),
+                    Filters.regex(helpers.keyboard_to_regex(keyboards['entity_selection'])),
                     subject_selection_response,
                 ),
             ],

@@ -19,8 +19,8 @@ def finish_dialog(update, context, controller):
         )
     elif type(controller) == controllers.AlbumController:
         image = controller.process(
-            subject=context.user_data['user']['subject'],
-            representation=context.user_data['user']['representation'],
+            subject=context.user_data['album']['entity'],
+            representation=context.user_data['album']['representation'],
         )
 
     if not image:
