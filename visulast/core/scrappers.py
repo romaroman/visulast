@@ -101,7 +101,8 @@ class CountryScrapper:
             origin = info_table.find("span", {"class": "birthplace"})
             if not origin:
                 try:
-                    origin = [elem for elem in info_table(text=re.compile(r'Origin|Born|Residence'))][0].parent.findNext()
+                    pattern = re.compile(r'Origin|Born|Residence')
+                    origin = [elem for elem in info_table(text=pattern)][0].parent.findNext()
                 except AttributeError:
                     return None
                 except IndexError:
