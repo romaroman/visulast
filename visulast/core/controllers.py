@@ -121,3 +121,18 @@ class AlbumController:
                 return self.tracks_bar_graph()
             elif representation == 'Bar graph':
                 return self.tracks_pie_graph()
+
+
+class ArtistController:
+    def __init__(self, model):
+        self.model = model
+
+
+class TagControllers:
+    def __init__(self, model):
+        self.model = model
+
+
+class TrackController:
+    def __init__(self, model):
+        self.model = model
