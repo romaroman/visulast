@@ -86,7 +86,7 @@ pep8==1.7.1
 pexpect==4.6.0
 phonenumbers==8.10.7
 pickleshare==0.7.5
-Pillow==5.4.1
+Pillow==6.2.0
 pluggy==0.9.0
 prometheus-client==0.6.0
 prompt-toolkit==2.0.9
